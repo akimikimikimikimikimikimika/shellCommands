@@ -7,23 +7,26 @@ elsif ARGV[0]=="help" then
   使い方:
    measure [command]
    measure -nooutput [command]
-	[command] を実行し,最後にその所用時間を表示します
+	[command] を実行し,最後にその所要時間を表示します
 	-nooutputオプションを付加すると,標準出力の内容を表示しません
  """
 else
 	if ARGV[0]=="-nooutput" then
 		ARGV.shift
-		command=ARGV.join(" ")
+		command='"'+ARGV.join('" "')+'"'
 		st=Time.now
-		`#{command}`
+		rtn=`#{command}`
+		stat=$?
 		en=Time.now
 	else
-		command=ARGV.join(" ")
+		command='"'+ARGV.join('" "')+'"'
 		st=Time.now
 		system(command)
+		stat=$?
 		en=Time.now
 	end
 	diff=en-st
+	print "time: "
 	if diff/3600>=1 then
 		print "#{(diff/3600).floor}h "
 	end
@@ -33,7 +36,9 @@ else
 	if diff>=1 then
 		print "#{diff.floor%60}s "
 	end
-	print "#{sprintf("%.3f",(diff*1000)%1000)}ms"
+	puts "#{sprintf("%.3f",(diff*1000)%1000)}ms"
+	puts "process id: #{stat.pid}"
+	puts "exit code: #{stat.exitstatus}"
 
-	puts ""
+	exit stat.exitstatus
 end
