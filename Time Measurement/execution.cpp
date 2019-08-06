@@ -23,7 +23,7 @@ int core(int argc,char* argv[]) {
 	}
 	else {
 		auto a1 = string(argv[1]);
-		if (!(a1=="help"&&a1=="-help"&&a1=="--help")) {
+		if (a1=="help"||a1=="-help"||a1=="--help") {
 			help();
 			return 0;
 		}
