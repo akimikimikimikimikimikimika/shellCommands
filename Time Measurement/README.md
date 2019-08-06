@@ -16,12 +16,13 @@ measure someCommand arg1 arg2...
 
 ### ソースコード
 
-このプログラムはCで書かれたバージョンとRubyで書かれたバージョンの両方が存在します。<br>
-Rubyは簡易的にテストするために書かれており,確実性も高いと思われます。Cはコンパイルして利用するため,場合によっては高速に動作します。
+このプログラムはC,C++,Rubyの3つのバージョンが存在します。<br>
+Rubyは簡易的にテストするために書かれており,確実性も高いと思われます。CやC++はコンパイルして利用するため,場合によっては高速に動作します。
 
 ### コンパイル
 
 ```sh
 cd "Time Measurement"
-clang *.c -o ../bin/measure -std=c17 -O3
+clang *.c -o ../bin/CMeasure -std=c17 -O3
+clang++ *.cpp -o ../bin/CppMeasure -std=c++2a -O3
 ```
