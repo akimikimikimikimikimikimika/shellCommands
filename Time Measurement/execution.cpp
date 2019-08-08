@@ -47,8 +47,8 @@ int measure(string cmd) {
 	}
 	else {
 		printTime(start,end);
-		cout << "exit code: " << extcode%255 << endl;
-		return extcode%255;
+		cout << "exit code: " << extcode%256 << endl;
+		return extcode%256;
 	}
 }
 

@@ -14,7 +14,7 @@ random [options]
 ### ソースコード
 
 このプログラムは Fortran,C,C++,Swift,Go,Rust の6つのバージョンが存在します。但し,前者2つは標準では時間シードで生成するため,利用には注意が必要です。<br>
-`random`と指定すると,C++のバイナリが実行されます。バージョンを指定して実行する場合は,それぞれ`random-f`,`random-c`,`random-cpp`,`random-swift`,`random-go`,`random-rust` と指定します。
+`random`と指定すると,C++のバイナリが実行されます。バージョンを指定して実行する場合は,それぞれ `random-f`,`random-c`,`random-cpp`,`random-swift`,`random-go`,`random-rust` と指定します。
 
 ### コンパイル
 

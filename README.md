@@ -18,6 +18,10 @@ iCloudに保存されたファイルに関して操作をします。
 `measure` コマンド<br>
 コマンドを実行するのにかかった所要時間を計測します。
 
+## Threading
+`thread` コマンド<br>
+複数のコマンドを容易に実行します。
+
 ## Time Stamp Reset
 `resetTS` コマンド<br>
 ファイルの変更日時をUnixエポックに変更します。

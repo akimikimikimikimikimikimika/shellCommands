@@ -44,8 +44,8 @@ int measure(char *cmd) {
 	}
 	else {
 		printTime(start,end);
-		printf("exit code: %d\n",extcode%255);
-		return extcode%255;
+		printf("exit code: %d\n",extcode%256);
+		return extcode%256;
 	}
 }
 
