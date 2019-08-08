@@ -24,7 +24,7 @@ iCloudに保存されたファイルに関して操作をします。
 
 ## Time Stamp Reset
 `resetTS` コマンド<br>
-ファイルの変更日時をUnixエポックに変更します。
+ファイルの変更日時を1970年1月1日に変更します。
 
 ## MASReceipt Addition
 `addMASReceipt` コマンド<br>
