@@ -14,6 +14,10 @@ iCloudに保存されたファイルに関して操作をします。
 `trash` コマンド<br>
 ファイルをゴミ箱に移動させます。
 
+## Appearance
+`appearance` コマンド<br>
+macOSのアピアランス (ライト/ダーク•アクセントカラー) を変更します。
+
 ## Time Measurement
 `measure` コマンド<br>
 コマンドを実行するのにかかった所要時間を計測します。
