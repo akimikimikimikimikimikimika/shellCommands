@@ -28,5 +28,5 @@ macOSのアピアランスを変更します。
 
 ```sh
 cd "Appearance"
-clang *.c -o ../bin/appearance -std=c17 -O3
+make build
 ```

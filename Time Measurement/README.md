@@ -24,6 +24,7 @@ Rubyは簡易的にテストするために書かれており,確実性も高い
 
 ```sh
 cd "Time Measurement"
-clang *.c -o ../bin/measure-c -std=c17 -O3
+make build-clang++ / make build-g++
+make build-clang   / make build-gcc
 clang++ *.cpp -o ../bin/measure-cpp -std=c++2a -O3
 ```

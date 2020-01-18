@@ -42,5 +42,5 @@ URL生成以降にファイルに加えた変更はダウンロードファイ�
 
 ```sh
 cd "Manage Ubiquitous Item"
-swiftc *.swift -o ../bin/mui
+make build
 ```

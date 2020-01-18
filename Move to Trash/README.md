@@ -16,5 +16,5 @@ rm コマンドを使う代わりに trash を利用することで,不意に削
 
 ```sh
 cd "Move to Trash"
-swiftc *.swift -o ../bin/trash
+make build
 ```

@@ -20,5 +20,5 @@ thread command1 command2...
 
 ```sh
 cd "Threading"
-clang++ *.cpp -o ../bin/thread -std=c++2a -O3
+make build-clang++ / make build-g++
 ```

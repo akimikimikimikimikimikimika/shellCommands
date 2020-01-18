@@ -1,3 +1,17 @@
 .DS_Store
 .vscode
-Time Measurement/source.cpp
+*.o
+Random/Cargo/target.zip
+bin/appearance
+bin/measure-c
+bin/measure-cpp
+bin/mui
+bin/random
+bin/random-c
+bin/random-cpp
+bin/random-f
+bin/random-go
+bin/random-rust
+bin/random-swift
+bin/thread
+bin/trash

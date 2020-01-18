@@ -20,11 +20,11 @@ random [options]
 
 ```sh
 cd "Random"
-(gfortran Random.f95 -o ../bin/random-f -O3 -fopenmp)
-(cd C ; clang *.c -o ../../bin/random-c -std=c17 -O3)
-(cd C++ ; clang++ *.cpp -o ../../bin/random-cpp -std=c++2a -O3)
-(cd Swift ; swiftc *.swift -o ../../bin/random-swift)
-(go build -o ../bin/random-go Random.go)
+make build-fortran
+make build-clang++ / make build-g++
+make build-clang   / make build-gcc
+make build-swift
+make build-go
 (cd Cargo ; cargo build --release)
 ```
 
