@@ -15,3 +15,4 @@ bin/random-rust
 bin/random-swift
 bin/thread
 bin/trash
+__pycache__

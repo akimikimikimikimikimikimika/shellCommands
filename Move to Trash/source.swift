@@ -5,10 +5,13 @@ func help() {
 
 		使い方:
 
-		 trash [path1] [path2]...
+		 trash (option) [path1] [path2]...
 		  [path1] [path2]... で示されたファイルをゴミ箱に移動させます
 		  rm コマンドを使う代わりに trash を利用することで,不意に削除してしまったファイルもゴミ箱から復元することができます
 		  もちろん, trash を使う場合は完全には削除されないので,完全に削除したい場合は通常の rm を使用してください
+
+		 オプション
+		  -q : ファイルが存在しないなどエラーがあってもメッセージを出力しません
 
 		""")
 }
@@ -26,17 +29,29 @@ if args.count>1 {
 		help()
 		exit(0)
 	}
-	for n in 1..<args.count {
+	var first = 1
+	var silent = false
+	var failed = false
+	if args[1]=="-q"||args[1]=="--silent" {
+		silent = true
+		first += 1
+	}
+	for n in first..<args.count {
 		let p = args[n]
 		let u = URL(fileURLWithPath: p)
 		if !fm.fileExists(atPath: p) {
-			message("指定されたファイルは存在しません: \(p)")
+			if !silent {message("指定されたファイルは存在しません: \(p)")}
+			failed = true
 		}
 		else {
 			do {try fm.trashItem(at: u,resultingItemURL: nil)}
-			catch {message("ゴミ箱への移動に失敗しました: \(p)")}
+			catch {
+				if !silent {message("ゴミ箱への移動に失敗しました: \(p)")}
+				failed = true
+			}
 		}
 	}
+	exit(failed ? 1 : 0)
 }
 else {
 	help()
