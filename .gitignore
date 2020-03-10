@@ -15,4 +15,5 @@ bin/random-rust
 bin/random-swift
 bin/thread
 bin/trash
+Archive/java/*.class
 __pycache__

@@ -1,21 +1,30 @@
-from python.util import error,helpText
-from python.create import Create
-from python.expand import Expand
-from python.paths import Paths
+require_relative "util.rb"
+require_relative "create.rb"
+require_relative "expand.rb"
+require_relative "paths.rb"
 
-class Help:
+class Help
 
-	@classmethod
-	def main(cls,arg):
-		if arg=="" or arg=="general" or arg=="help": cls.__genericHelp()
-		elif arg=="create" or arg=="compress": Create.help()
-		elif arg=="expand" or arg=="extract" or arg=="decompress": Expand.help()
-		elif arg=="paths" or arg=="list": Paths.help()
-		else: error("指定したヘルプテキストはありません: "+arg)
+	public
 
-	@classmethod
-	def __genericHelp(cls):
+	def self.main(arg)
+		case arg
+			when "","general","help"
+				genericHelp()
+			when "create","compress"
+				Create::help()
+			when "expand","extract","decompress"
+				Expand::help()
+			when "paths","list"
+				Paths::help()
+			else
+				error("指定したヘルプテキストはありません: "+arg)
+		end
+	end
 
+	private
+
+	def self.genericHelp()
 		helpText("""
 
 			使い方:
@@ -38,3 +47,6 @@ class Help:
 			 アーカイブに含まれるファイルの一覧を表示します
 
 		""")
+	end
+
+end

@@ -39,4 +39,13 @@ arc extract [archive path] [options]
 
 ### ソースコード
 
-このプログラムは Python 3 で書かれています。
+このプログラムは幾つかの言語のバージョンが存在している<br>
+それぞれ異なるコマンド名を持ち, `arc` の箇所を適宜次のように置き換えて使用する。
+
+* `arc-py` (Python 3)
+* `arc-rb` (Ruby)
+* `arc-php` (PHP)
+* `arc-js` (Node.js)
+* `arc-java` (Java)
+
+尚, `arc` はデフォルトで `arc-java` のシンボリックリンクである

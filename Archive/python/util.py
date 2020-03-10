@@ -17,7 +17,8 @@ chdir=os.chdir
 mv=shutil.move
 cp=shutil.copy
 rm=os.remove
-fileList=glob.glob
+fileList=os.listdir
+concatPath=os.path.join
 which=shutil.which
 isfile=os.path.isfile
 isdir=os.path.isdir
@@ -34,13 +35,11 @@ tf=tarfile
 class temp():
 	__tmp=None
 	tmpDir=None
-	arcPath=None
 	def __init__(self):
 		self.__tmp=tempfile.TemporaryDirectory()
 		self.tmpDir=self.__tmp.name
-		self.arcPath=self.tmpDir+"/.archive"
 	def blank(self):
-		io=open(self.tmpDir+"/.blank","w")
+		io=open(concatPath(self.tmpDir,".blank"),"w")
 		io.close()
 	def done(self): self.__tmp.cleanup()
 
@@ -52,7 +51,7 @@ def password():
 	return p
 
 def error(text):
-	sys.stderr.write(text+"\r\n")
+	sys.stderr.write(text+os.linesep)
 	exit(1)
 
 def detect(path):
@@ -60,12 +59,13 @@ def detect(path):
 	if tf.is_tarfile(path): return "tar"
 	else: return None
 
-def exec(cmd,quiet=False):
-	out=subprocess.DEVNULL if quiet else None
-	return subprocess.call(cmd,stdout=out,stderr=subprocess.DEVNULL,env=env)
+def exec(cmd):
+	p=subprocess.Popen(cmd,stdin=None,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,env=env)
+	p.wait()
+	return p.returncode
 
 def getData(cmd):
-	p=subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+	p=subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,env=env)
 	p.wait()
 	if p.returncode==0: return p.stdout.read().decode("utf8").rstrip()
 	else: return None
@@ -87,7 +87,10 @@ def gnuTar():
 	return None
 
 def helpText(text):
-	print(re.sub(r"\n\t+",r"\n",text))
+	text=re.sub(r"\n\t+",r"\n",text)
+	text=re.sub(r"^\r?\n","",text)
+	text=re.sub(r"\r?\n\r?\n$","",text)
+	print(text)
 
 def levelCast(val):
 	if re.search(r"^[1-9]$",val): l=(val,str(math.ceil(int(val)/2)*2-1),val,val)
@@ -98,17 +101,28 @@ def levelCast(val):
 	else: l=("6","5","1","3")
 	return l
 
-compressors=[
-	(["z","Z","compress","lzw"],"tar.Z",["compress","-f"],"Z",["uncompress","-f"]),
-	(["gz","gzip","deflate"],"tgz",["gzip","-f","-k"],"gz",["gzip","-d","-f"]),
-	(["bz","bz2","bzip","bzip2"],"tbz2",["bzip2","-z","-f","-k"],"bz2",["bzip2","-d"]),
-	(["xz","lzma"],"txz",["xz","-z","-f","-k","-T0"],"xz",["xz","-d","-f"]),
-	(["lz","lzip"],"tlz",["lzip","-f","-k"],"lz",["lzip","-d","-f"]),
-	(["lzo","lzop"],"tar.lzo",["lzop","-f"],"lzo",["lzop","-d","-f"]),
-	(["br","brotli"],"tar.br",["brotli","-f"],"br",["brotli","-d","-f"]),
-	(["zst","zstd","zstandard"],"tar.zst",["zstd","-f","-T0"],"zst",["zstd","-d","-f","-T0"]),
-	(["lz4"],"tar.lz4",["lz4","-f"],"lz4",["lz4","-d","-f"])
-]
+class CompressType:
+	def __init__(self,data):
+		self.keys=data[0]
+		self.compressCmd=data[2]
+		self.decompressCmd=data[4]
+		self.tarExt=data[1]
+		self.ext=data[3]
+	@classmethod
+	def each(cls,l):
+		return [CompressType(a) for a in l]
+
+compressors=CompressType.each([
+	[["z","Z","compress","lzw"],"tar.Z",["compress","-f"],"Z",["uncompress","-f"]],
+	[["gz","gzip","deflate"],"tgz",["gzip","-f","-k"],"gz",["gzip","-d","-f"]],
+	[["bz","bz2","bzip","bzip2"],"tbz2",["bzip2","-z","-f","-k"],"bz2",["bzip2","-d"]],
+	[["xz","lzma"],"txz",["xz","-z","-f","-k","-T0"],"xz",["xz","-d","-f"]],
+	[["lz","lzip"],"tlz",["lzip","-f","-k"],"lz",["lzip","-d","-f"]],
+	[["lzo","lzop"],"tar.lzo",["lzop","-f"],"lzo",["lzop","-d","-f"]],
+	[["br","brotli"],"tar.br",["brotli","-f"],"br",["brotli","-d","-f"]],
+	[["zst","zstd","zstandard"],"tar.zst",["zstd","-f","-T0"],"zst",["zstd","-d","-f","-T0"]],
+	[["lz4"],"tar.lz4",["lz4","-f"],"lz4",["lz4","-d","-f"]]
+])
 
 def switches(d,params,inputs,max=0):
 
@@ -125,9 +139,7 @@ def switches(d,params,inputs,max=0):
 
 		match=False
 
-		if a=="--":
-			noSwitches=True
-			match=True
+		if a=="--": noSwitches=match=True
 
 		if not noSwitches:
 
@@ -138,16 +150,14 @@ def switches(d,params,inputs,max=0):
 						if s!=None:
 							match=True
 							sharp=s.group(1)
-					else:
-						if p==a: match=True
+					elif p==a: match=True
 					if match: break
 				if match:
 					var=None
 					for act in cmd[1:]:
 						if act[0]=="var":
 							var=act[1]
-							if len(act)==3: multiple=True
-							else: multiple=False
+							multiple=len(act)==3
 						if act[0]=="write":
 							if sharp!=None:
 								d[act[1]]=sharp

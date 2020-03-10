@@ -19,9 +19,9 @@ build: bin clean
 
 
 build-clang++:
-	@make build -e cmd=clang++ ext=cpp std=c++2a binFile=../bin/measure-cpp
+	@make build -e cmd="clang++ -pthread" ext=cpp std=c++2a binFile=../bin/measure-cpp
 build-g++:
-	@make build -e cmd=g++ ext=cpp std=c++2a binFile=../bin/measure-cpp
+	@make build -e cmd="g++ -pthread" ext=cpp std=c++2a binFile=../bin/measure-cpp
 build-clang:
 	@make build -e cmd=clang ext=c std=c17 binFile=../bin/measure-c
 build-gcc:

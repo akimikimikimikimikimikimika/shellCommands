@@ -8,174 +8,184 @@ d={
 	"suppressExpansion":False
 }
 
-def help():
-	helpText("""
+class Expand:
 
-	arc expand [archive path] [options]
-	arc extract [archive path] [options]
-	arc decompress [archive path] [options]
+	@classmethod
+	def help(cls):
+		helpText("""
 
-	アーカイブを展開します
-	圧縮ファイルを解凍します
+			arc expand [archive path] [options]
+			arc extract [archive path] [options]
+			arc decompress [archive path] [options]
 
-	オプション
+			アーカイブを展開します
+			圧縮ファイルを解凍します
 
-	-a [string],-i [string],--archive [string],--in [string]
-	 アーカイブ•圧縮ファイルを指定します
+			オプション
 
-	-d [string],-o [string],--dir [string],--out [string]
-	 展開する場所を指定します
-	 アーカイブの場合は指定したディレクトリ内に,圧縮ファイルの場合は指定したパスに保存します
-	 指定したディレクトリが存在しなければ自動的にディレクトリを生成します
-	--cwd
-	 カレントディレクトリに展開します
-	--same
-	 アーカイブファイルのあるディレクトリに展開します (デフォルト)
+			-a [string],-i [string],--archive [string],--in [string]
+			 アーカイブ•圧縮ファイルを指定します
 
-	-s,--suppress-expansion
-	 .tar.gz など,圧縮したtarアーカイブファイルを受け取った場合に,圧縮を解凍してもtarを展開しないようにします
+			-d [string],-o [string],--dir [string],--out [string]
+			 展開する場所を指定します
+			 アーカイブの場合は指定したディレクトリ内に,圧縮ファイルの場合は指定したパスに保存します
+			 指定したディレクトリが存在しなければ自動的にディレクトリを生成します
+			--cwd
+			 カレントディレクトリに展開します
+			--same
+			 アーカイブファイルのあるディレクトリに展開します (デフォルト)
 
-	-e,--encrypt
-	 暗号化ファイルを展開する場合は,これを使用することをおすすめします
-	 パスワードは後で指定します
+			-s,--suppress-expansion
+			 .tar.gz など,圧縮したtarアーカイブファイルを受け取った場合に,圧縮を解凍してもtarを展開しないようにします
 
-	""")
+			-e,--encrypt
+			 暗号化ファイルを展開する場合は,このオプションを使用してください
+			 パスワードは後で指定します
 
-def expand():
-	analyze()
-	core()
+		""")
 
-def analyze():
+	@classmethod
+	def main(cls):
+		cls.__analyze()
+		cls.__core()
 
-	switches(d,[
-		[["-a","-i","--archive","--in"],["var","archive"]],
-		[["-d","-o","--dir","--out"],["var","out"]],
-		[["--cwd"],["write","outType","cwd"],["write","out",""]],
-		[["--same"],["write","outType","same"],["write","out",""]],
-		[["-e","--encrypted"],["write","encrypted",True]],
-		[["-s","--suppress-expansion"],["write","suppressExpansion",True]],
-	],["archive"],1)
+	@classmethod
+	def __analyze(cls):
 
-	if not isfile(d["archive"]): error("指定したパスは不正です: "+d["archive"])
+		switches(d,[
+			[["-a","-i","--archive","--in"],["var","archive"]],
+			[["-d","-o","--dir","--out"],["var","out"]],
+			[["--cwd"],["write","outType","cwd"],["write","out",""]],
+			[["--same"],["write","outType","same"],["write","out",""]],
+			[["-e","--encrypted"],["write","encrypted",True]],
+			[["-s","--suppress-expansion"],["write","suppressExpansion",True]],
+		],["archive"],1)
 
-	if d["outType"]=="cwd" and d["out"]=="": d["dir"]=cwd
-	if d["outType"]=="same" and d["out"]=="": d["dir"]=getdir(d["archive"])
+		if not isfile(d["archive"]): error("指定したパスは不正です: "+d["archive"])
 
-def core():
-	t=temp()
-	if isfile(d["out"]):
-		if decompress(t): move(t,True)
-		else:
+		if d["outType"]=="cwd" and d["out"]=="": d["out"]=cwd
+		if d["outType"]=="same" and d["out"]=="": d["out"]=getdir(d["archive"])
+
+	@classmethod
+	def __core(cls):
+		t=temp()
+		if isfile(d["out"]):
+			if cls.__decompress(t): cls.__move(t,True)
+			else:
+				t.done()
+				error("このファイルはこの場所には展開できません")
+		elif isdir(d["out"]):
+			if d["suppressExpansion"]:
+				if cls.__decompress(t): cls.__move(t,True)
+			else:
+				if cls.__extract(t): cls.__move(t)
+				elif cls.__decompress(t): cls.__move(t,True)
+				else:
+					t.done()
+					error("このファイルは展開できません")
+		elif islink(d["out"]):
 			t.done()
-			error("このファイルはこの場所には展開できません")
-	elif isdir(d["out"]):
-		if d["suppressExpansion"]:
-			if decompress(t): move(t,True)
+			error("リンクが不正です: "+d["out"])
 		else:
-			if extract(t): move(t)
-			elif decompress(t): move(t,True)
+			pd=getdir(d["out"])
+			if not isdir(pd):
+				try: mkdir(getdir(d["out"]))
+				except:
+					t.done()
+					error("この場所に展開できません")
+			if d["suppressExpansion"]:
+				if cls.__decompress(t): cls.__move(t,True)
 			else:
-				t.done()
-				error("このファイルは展開できません")
-	elif islink(d["out"]):
+				if cls.__extract(t): cls.__move(t)
+				elif cls.__decompress(t): cls.__move(t,True)
+				else:
+					t.done()
+					error("このファイルは展開できません")
 		t.done()
-		error("リンクが不正です: "+d["out"])
-	else:
-		pd=getdir(d["out"])
-		if not isdir(pd):
-			try: mkdir(getdir(d["out"]))
-			except:
-				t.done()
-				error("この場所に展開できません")
-		if d["suppressExpansion"]:
-			if decompress(t): move(t,True)
+
+	@classmethod
+	def __extract(cls,t):
+		done=False
+		if d["encrypted"]: p=password()
+
+		at=detect(d["archive"])
+		if not done and at=="zip":
+			if d["encrypted"]: pwd=p.encode("utf-8")
+			else: pwd=None
+
+			z=zf.ZipFile(file=d["archive"],mode="r")
+			try:
+				z.extractall(path=t.tmpDir,pwd=pwd)
+				done=True
+			except: pass
+			z.close()
+		if not done and at=="tar":
+			ta=tf.open(name=d["archive"],mode="r:*")
+			try:
+				ta.extractall(path=ta.tmpDir)
+				done=True
+			except: pass
+			ta.close()
+
+		cmd=bsdTar()
+		if not done and cmd!=None:
+			arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
+			if exec(arg)==0: done=True
+
+		cmd=gnuTar()
+		if not done and cmd!=None:
+			arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
+			if exec(arg)==0: done=True
+
+		cmd=which("unzip")
+		if not done and cmd!=None:
+			arg=[cmd,"-qq",d["archive"],"-d",t.tmpDir]
+			if d["encrypted"]:
+				arg.insert(1,"-P")
+				arg.insert(2,p)
+			if exec(arg)==0: done=True
+
+		cmd=which("7z")
+		if not done and cmd!=None:
+			arg=[cmd,"x","-t7z",d["archive"],"-o"+t.tmpDir]
+			if d["encrypted"]: arg.append("-p"+p)
+			if exec(arg)==0: done=True
+
+		return done
+
+	@classmethod
+	def __decompress(cls,t):
+		arc=concatPath(t.tmpDir,basename(d["archive"]))
+		hardlink(d["archive"],arc)
+		done=False
+		for c in compressors:
+			cmd=which(c.decompressCmd[0])
+			if cmd==None: continue
+			c.decompressCmd[0]=cmd
+			c.decompressCmd.append(arc)
+			if c.ext=="lz4":
+				a=re.sub(r"\.lz4$","",arc)
+				if a==arc: c.decompressCmd.append(a+".out")
+				else: c.decompressCmd.append(a)
+			if exec(c.decompressCmd,True)==0:
+				done=True
+				break
+		if isfile(arc): rm(arc)
+		return done
+
+	@classmethod
+	def __move(cls,t,one=False):
+		fl=fileList(t.tmpDir)
+		if len(fl)==1 and one:
+			if isfile(d["out"]): rm(d["out"])
+			if isdir(d["out"]):
+				p=concatPath(d["out"],fl[0])
+				if isfile(p): rm(p)
+			mv(fl[0],d["out"])
 		else:
-			if extract(t): move(t)
-			elif decompress(t): move(t,True)
-			else:
-				t.done()
-				error("このファイルは展開できません")
-	t.done()
-
-def extract(t):
-	done=False
-
-	at=detect(d["archive"])
-	if not done and at=="zip":
-		pwd=None
-		if d["encrypted"]:
-			p=""
-			while p=="": p=password()
-			pwd=p.encode("utf-8")
-
-		z=zf.ZipFile(file=d["archive"],mode="r")
-		try:
-			z.extractall(path=t.tmpDir,pwd=pwd)
-			done=True
-		except: pass
-		z.close()
-	if not done and at=="tar":
-		t=tf.open(name=d["archive"],mode="r:*")
-		try:
-			t.extractall(path=t.tmpDir)
-			done=True
-		except: pass
-		t.close()
-
-	cmd=bsdTar()
-	if not done and cmd!=None:
-		arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
-		if exec(arg)==0: done=True
-
-	cmd=gnuTar()
-	if not done and cmd!=None:
-		arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
-		if exec(arg)==0: done=True
-
-	cmd=which("unzip")
-	if not done and cmd!=None:
-		arg=[cmd,"-qq",d["archive"],"-d",t.tmpDir]
-		if exec(arg)==0: done=True
-
-	cmd=which("7z")
-	if not done and cmd!=None:
-		arg=[cmd,"x","-t7z",d["archive"],"-o"+t.tmpDir]
-		if exec(arg)==0: done=True
-
-	return done
-
-def decompress(t):
-	arc=t.tmpDir+"/"+basename(d["archive"])
-	hardlink(d["archive"],arc)
-	done=False
-	for c in compressors:
-		cmd=which(c[4][0])
-		if cmd==None: continue
-		c[4][0]=cmd
-		c[4].append(arc)
-		if c[3]=="lz4":
-			a=re.sub(r"\.lz4$","",arc)
-			if a==arc: c[4].append(a+".out")
-			else: c[4].append(a)
-		if exec(c[4],True)==0:
-			done=True
-			break
-	if isfile(arc): rm(arc)
-	return done
-
-def move(t,one=False):
-	fl=fileList(t.tmpDir+"/*")
-	if len(fl)==1 and one:
-		if isfile(d["out"]): rm(d["out"])
-		if isdir(d["out"]):
-			p=d["out"]+"/"+basename(fl[0])
-			if isfile(p): rm(p)
-		mv(fl[0],d["out"])
-	else:
-		try:
-			if isfile(d["out"]): error("この場所には展開できません")
-			elif not isdir(d["out"]): mkdir(d["out"])
-			for f in fl: mv(f,d["out"])
-		except:
-			print(fl)
-			error("このファイルはこの場所には展開できません")
+			try:
+				if isfile(d["out"]): error("この場所には展開できません")
+				elif not isdir(d["out"]): mkdir(d["out"])
+				for f in fl: mv(concatPath(t.tmpDir,f),concatPath(d["out"],f))
+			except:
+				error("このファイルはこの場所には展開できません")
