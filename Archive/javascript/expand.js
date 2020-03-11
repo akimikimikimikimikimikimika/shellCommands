@@ -127,29 +127,31 @@ function extract(t) {
 	if (d["encrypted"]) let p=u.password();
 
 	var cmd;
+
+	cmd=u.which("unzip");
+	if (!done && cmd!=null) {
+		let arg=[cmd,"-qq",d["archive"],"-d",t.tmpDir];
+		if (d["encrypt"]) arg.splice(1,0,"-P",p);
+		if (u.exec(arg,true)==0) done=true;
+	}
+
 	cmd=u.bsdTar();
 	if (!done && cmd!=null) {
 		let arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir];
-		
-		if (u.exec(arg)==0) done=true;
+		if (u.exec(arg,true)==0) done=true;
 	}
 
 	cmd=u.gnuTar();
 	if (!done && cmd!=null) {
 		let arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir];
-		if (u.exec(arg)==0) done=true;
-	}
-
-	cmd=u.which("unzip");
-	if (!done && cmd!=null) {
-		let arg=[cmd,"-qq",d["archive"],"-d",t.tmpDir];
-		if (u.exec(arg)==0) done=true;
+		if (u.exec(arg,true)==0) done=true;
 	}
 
 	cmd=u.which("7z");
 	if (!done && cmd!=null) {
 		let arg=[cmd,"x","-t7z",d["archive"],"-o"+t.tmpDir];
-		if (u.exec(arg)==0) done=true;
+		if (d["encrypted"]) arg.push("-p"+p);
+		if (u.exec(arg,true)==0) done=true;
 	}
 
 	return done;

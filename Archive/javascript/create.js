@@ -312,7 +312,7 @@ class Zip {
 		let tmp=new u.Temp();
 		let ap=u.concatPath(tmp.tmpDir,".archive");
 		if (d["inFile"].length>0) {
-			var arg=[cmd,"a","-tzip",ap,"-sas","-xr!.DS_Store","-mx="+l,"-mm="+m];
+			var arg=[cmd,"a","-tzip",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-mm="+m];
 			if (d["encrypted"]) {
 				p=u.password();
 				arg.push("-mem="+e,"-p"+p);
@@ -343,7 +343,7 @@ class Zip {
 			if (d["encrypted"]) arg.push("-p",u.password());
 			arg.push("-x",".DS_Store");
 			arg.push("-Z",m);
-			if (u.exec(arg)!=0) {
+			if (u.exec(arg,true)!=0) {
 				tmp.done();
 				u.error("zipでエラーが発生しました");
 			}
@@ -369,7 +369,7 @@ class Zip {
 
 		if (d["inFile"].length>0) {
 			arg=arg.concat(d["inFile"]);
-			if (u.exec(arg)!=0) {
+			if (u.exec(arg,true)!=0) {
 				tmp.done();
 				u.error("tarでエラーが発生しました");
 			}
@@ -480,7 +480,7 @@ class Tar {
 		let tmp=new u.Temp();
 		let ap=u.concatPath(tmp.tmpDir,".archive");
 		if (d["inFile"].length>0) {
-			var arg=[cmd,"a","-ttar",ap,"-sas"];
+			var arg=[cmd,"a","-ttar",ap,"-bso0","-bsp0","-sas"];
 			if (d["excludeHiddenFiles"]) arg.push("-xr!.DS_Store");
 			arg=arg.concat(d["inFile"]);
 			if (u.exec(arg,true)!=0) {
@@ -611,7 +611,7 @@ class Sz {
 		let tmp=new u.Temp();
 		let ap=u.concatPath(tmp.tmpDir,".archive");
 		if (d["inFile"].length>0) {
-			var arg=[cmd,"a","-t7z",ap,"-sas","-xr!.DS_Store","-mx="+l,"-m0="+m];
+			var arg=[cmd,"a","-t7z",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-m0="+m];
 			if (d["encrypted"]) {
 				let p=u.password();
 				arg.push("-p"+p);
@@ -643,7 +643,7 @@ class Sz {
 
 		if (d["inFile"].length>0) {
 			arg=arg.concat(d["inFile"]);
-			if (u.exec(arg)!=0) {
+			if (u.exec(arg,true)!=0) {
 				tmp.done();
 				u.error("tarでエラーが発生しました");
 			}

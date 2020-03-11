@@ -131,26 +131,26 @@ class Expand {
 		if (!$done && $cmd!=null) {
 			$arg=[$cmd,"-qq",$d["archive"],"-d",$t->tmpDir];
 			if ($d["encrypted"]) array_splice($arg,1,0,["-P",$p]);
-			if (execute($arg)==0) $done=true;
+			if (execute($arg,true)==0) $done=true;
 		}
 
 		$cmd=bsdTar();
 		if (!$done && $cmd!=null) {
 			$arg=[$cmd,"-xf",$d["archive"],"-C",$t->tmpDir];
-			if (execute($arg)==0) $done=true;
+			if (execute($arg,true)==0) $done=true;
 		}
 
 		$cmd=gnuTar();
 		if (!$done && $cmd!=null) {
 			$arg=[$cmd,"-xf",$d["archive"],"-C",$t->tmpDir];
-			if (execute($arg)==0) $done=true;
+			if (execute($arg,true)==0) $done=true;
 		}
 
 		$cmd=which("7z");
 		if (!$done && $cmd!=null) {
 			$arg=[$cmd,"x","-t7z",$d["archive"],"-o".$t->tmpDir];
 			if ($d["encrypted"]) array_push($arg,"-p"+$p);
-			if (execute($arg)==0) $done=true;
+			if (execute($arg,true)==0) $done=true;
 		}
 
 		return $done;

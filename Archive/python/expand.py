@@ -127,29 +127,29 @@ class Expand:
 			except: pass
 			ta.close()
 
-		cmd=bsdTar()
-		if not done and cmd!=None:
-			arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
-			if exec(arg)==0: done=True
-
-		cmd=gnuTar()
-		if not done and cmd!=None:
-			arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
-			if exec(arg)==0: done=True
-
 		cmd=which("unzip")
 		if not done and cmd!=None:
 			arg=[cmd,"-qq",d["archive"],"-d",t.tmpDir]
 			if d["encrypted"]:
 				arg.insert(1,"-P")
 				arg.insert(2,p)
-			if exec(arg)==0: done=True
+			if exec(arg,True)==0: done=True
+
+		cmd=bsdTar()
+		if not done and cmd!=None:
+			arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
+			if exec(arg,True)==0: done=True
+
+		cmd=gnuTar()
+		if not done and cmd!=None:
+			arg=[cmd,"-xf",d["archive"],"-C",t.tmpDir]
+			if exec(arg,True)==0: done=True
 
 		cmd=which("7z")
 		if not done and cmd!=None:
 			arg=[cmd,"x","-t7z",d["archive"],"-o"+t.tmpDir]
 			if d["encrypted"]: arg.append("-p"+p)
-			if exec(arg)==0: done=True
+			if exec(arg,True)==0: done=True
 
 		return done
 

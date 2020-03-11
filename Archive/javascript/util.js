@@ -81,7 +81,10 @@ e.error=(text)=>{
 
 e.exec=(cmd,quiet=false)=>{
 	let c=cmd.shift();
-	let p=child_process.spawnSync(c,cmd,{env:e.env,stdio:["inherit","ignore","ignore"]});
+	var d;
+	if (quiet) d=["inherit","ignore","ignore"];
+	else d=["inherit","inherit","ignore"];
+	let p=child_process.spawnSync(c,cmd,{env:e.env,stdio:d});
 	return p.status;
 };
 
@@ -170,6 +173,7 @@ e.switches=(d,params,inputs,max=0)=>{
 		var match=false;
 
 		if (a=="--") noSwitches=match=true;
+		if (a=="") match=true;
 
 		if (!noSwitches) {
 

@@ -42,20 +42,8 @@ exports.Paths=Paths;
 function cmd() {
     var t;
     t=u.bsdTar();
-	if (t) {
-		let l=u.getData([t,"-tf",d["archive"]]);
-		if (l) {
-			console.log(l);
-			return true;
-		}
-	}
-	t=gnuTar();
-	if (t) {
-		let l=getData([t,"-tf",d["archive"]]);
-		if (l) {
-			console.log(l);
-			return true;
-		}
-	}
+	if (t) if (l) if (u.exec([t,"-tf",d["archive"]])) return true;
+	t=u.gnuTar();
+	if (t) if (l) if (u.exec([t,"-tf",d["archive"]])) return true;
 	return false;
 }

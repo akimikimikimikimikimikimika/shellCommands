@@ -300,7 +300,7 @@ class Create:
 			tmp=temp()
 			ap=concatPath(tmp.tmpDir,".archive")
 			if len(d["inFile"])>0:
-				arg=[cmd,"a","-tzip",ap,"-sas","-xr!.DS_Store","-mx="+l,"-mm="+m]
+				arg=[cmd,"a","-tzip",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-mm="+m]
 				if d["encrypted"]:
 					p=password()
 					arg.extend(["-mem="+e,"-p"+p])
@@ -328,7 +328,7 @@ class Create:
 				if d["encrypted"]: arg.append("-p",password())
 				arg.extend(["-x",".DS_Store"])
 				arg.extend(["-Z",m])
-				if exec(arg)!=0:
+				if exec(arg,True)!=0:
 					tmp.done()
 					error("zipでエラーが発生しました")
 			else:
@@ -351,7 +351,7 @@ class Create:
 
 			if len(d["inFile"])>0:
 				arg.extend(d["inFile"])
-				if exec(arg)!=0:
+				if exec(arg,True)!=0:
 					tmp.done()
 					error("tarでエラーが発生しました")
 			else:
@@ -458,7 +458,7 @@ class Create:
 			tmp=temp()
 			ap=concatPath(tmp.tmpDir,".archive")
 			if len(d["inFile"])>0:
-				arg=[cmd,"a","-ttar",ap,"-sas"]
+				arg=[cmd,"a","-ttar",ap,"-bso0","-bsp0","-sas"]
 				if d["excludeHiddenFiles"]: arg.append("-xr!.DS_Store")
 				arg.extend(d["inFile"])
 				if exec(arg,True)!=0:
@@ -623,7 +623,7 @@ class Create:
 			tmp=temp()
 			ap=concatPath(tmp.tmpDir,".archive")
 			if len(d["inFile"])>0:
-				arg=[cmd,"a","-t7z",ap,"-sas","-xr!.DS_Store","-mx="+l,"-m0="+m]
+				arg=[cmd,"a","-t7z",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-m0="+m]
 				if d["encrypted"]:
 					p=password()
 					arg.append("-p"+p)
@@ -651,7 +651,7 @@ class Create:
 
 			if len(d["inFile"])>0:
 				arg.extend(d["inFile"])
-				if exec(arg)!=0:
+				if exec(arg,True)!=0:
 					tmp.done()
 					error("tarでエラーが発生しました")
 			else:

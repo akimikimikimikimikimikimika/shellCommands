@@ -74,8 +74,13 @@ def error(text)
 	exit(1)
 end
 
-def exec(cmd)
-	pid=spawn($env,*cmd,{in:STDIN,out:"/dev/null",err:"/dev/null"})
+def exec(cmd,quiet=false)
+	if quiet
+		d={in:STDIN,out:"/dev/null",err:"/dev/null"}
+	else
+		d={in:STDIN,out:STDOUT,err:"/dev/null"}
+	end
+	pid=spawn($env,*cmd,d)
 	Process.waitpid(pid)
 	$?
 end
@@ -191,6 +196,7 @@ def switches(d,params,inputs,max=0)
 		match=false
 
 		noSwitches=match=true if a=="--"
+		match=true if a==""
 
 		if !noSwitches
 

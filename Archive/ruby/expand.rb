@@ -135,26 +135,26 @@ class Expand
 		if !done && cmd!=nil
 			arg=[cmd,"-qq","-d",t.tmpDir,@d[:archive]]
 			arg.insert(1,"-P",p) if @d[:encrypted]
-			done=true if exec(arg)==0
+			done=true if exec(arg,true)==0
 		end
 
 		cmd=bsdTar()
 		if !done && cmd!=nil
 			arg=[cmd,"-xf",@d[:archive],"-C",t.tmpDir]
-			done=true if exec(arg)==0
+			done=true if exec(arg,true)==0
 		end
 
 		cmd=gnuTar()
 		if !done && cmd!=nil
 			arg=[cmd,"-xf",@d[:archive],"-C",t.tmpDir]
-			done=true if exec(arg)==0
+			done=true if exec(arg,true)==0
 		end
 
 		cmd=which("7z")
 		if !done && cmd!=nil
 			arg=[cmd,"x","-t7z",@d[:archive],"-o"+t.tmpDir]
 			arg.push("-p"+p) if @d[:encrypted]
-			done=true if exec(arg)==0
+			done=true if exec(arg,true)==0
 		end
 
 		return done

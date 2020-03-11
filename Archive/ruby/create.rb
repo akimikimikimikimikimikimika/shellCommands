@@ -339,7 +339,7 @@ class Create
 			tmp=Temp.new()
 			ap=concatPath(tmp.tmpDir,".archive")
 			if @d[:inFile].length>0
-				arg=[cmd,"a","-tzip",ap,"-sas","-xr!.DS_Store","-mx="+l,"-mm="+m]
+				arg=[cmd,"a","-tzip",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-mm="+m]
 				if @d[:encrypted]
 					p=password()
 					arg.push("-mem="+e,"-p"+p)
@@ -370,7 +370,7 @@ class Create
 				arg.push("-p",password()) if @d[:encrypted]
 				arg.push("-x",".DS_Store")
 				arg.push("-Z",m)
-				if exec(arg)!=0
+				if exec(arg,true)!=0
 					tmp.done()
 					error("zipでエラーが発生しました")
 				end
@@ -395,7 +395,7 @@ class Create
 
 			if @d[:inFile].length>0
 				arg=arg.union(@d[:inFile])
-				if exec(arg)!=0
+				if exec(arg,true)!=0
 					tmp.done()
 					error("tarでエラーが発生しました")
 				end
@@ -522,7 +522,7 @@ class Create
 			tmp=Temp.new()
 			ap=concatPath(tmp.tmpDir,".archive")
 			if @d[:inFile].length>0
-				arg=[cmd,"a","-ttar",ap,"-sas"]
+				arg=[cmd,"a","-ttar",ap,"-bso0","-bsp0","-sas"]
 				if @d[:excludeHiddenFiles]
 					arg.push("-xr!.DS_Store")
 				end
@@ -679,7 +679,7 @@ class Create
 			tmp=Temp.new()
 			ap=concatPath(tmp.tmpDir,".archive")
 			if @d[:inFile].length>0
-				arg=[cmd,"a","-t7z",ap,"-sas","-xr!.DS_Store","-mx="+l,"-m0="+m]
+				arg=[cmd,"a","-t7z",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-m0="+m]
 				if @d[:encrypted]
 					p=password()
 					arg.push("-p"+p)
@@ -710,7 +710,7 @@ class Create
 
 			if @d[:inFile].length>0
 				arg=arg.union(@d[:inFile])
-				if exec(arg)!=0
+				if exec(arg,true)!=0
 					tmp.done()
 					error("tarでエラーが発生しました")
 				end

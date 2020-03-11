@@ -85,11 +85,17 @@ function error($text) {
 function execute($cmd,$quiet=false) {
 	global $env;
 
-	$p=proc_open($cmd,[
+	if ($quiet) $f=[
 		0=>STDIN,
 		1=>["file","/dev/null","w"],
 		2=>["file","/dev/null","w"]
-	],$pipes,null,$env);
+	];
+	else $f=[
+		0=>STDIN,
+		1=>STDOUT,
+		2=>["file","/dev/null","w"]
+	];
+	$p=proc_open($cmd,$d,$pipes,null,$env);
 	return proc_close($p);
 }
 
@@ -192,6 +198,7 @@ function switches(&$d,$params,$inputs,$max=0) {
 		$match=false;
 
 		if ($a=="--") $noSwitches=$match=true;
+		if ($a=="") $match=true;
 
 		if (!$noSwitches) {
 

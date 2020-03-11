@@ -50,19 +50,11 @@ class Paths
 	def self.cmd()
 		t=bsdTar()
 		if t
-			l=getData([t,"-tf",@d[:archive]])
-			if l
-				puts(l)
-				return true
-			end
+			if exec([t,"-tf",@d[:archive]]) then return true end
 		end
 		t=gnuTar()
 		if t
-			l=getData([t,"-tf",@d[:archive]])
-			if l
-				puts(l)
-				return true
-			end
+			if exec([t,"-tf",@d[:archive]]) then return true end
 		end
 		false
 	end

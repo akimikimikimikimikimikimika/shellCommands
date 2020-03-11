@@ -40,15 +40,11 @@ class Paths:
 	def __cmd(cls):
 		t=bsdTar()
 		if t:
-			l=getData([t,"-tf",d["archive"]])
-			if l:
-				print(l)
+			if exec([t,"-tf",d["archive"]])==0:
 				return True
 		t=gnuTar()
 		if t:
-			l=getData([t,"-tf",d["archive"]])
-			if l:
-				print(l)
+			if exec([t,"-tf",d["archive"]])==0:
 				return True
 		return False
 

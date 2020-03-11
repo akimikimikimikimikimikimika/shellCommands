@@ -183,19 +183,19 @@ public class expand {
 			arg=util.sa(cmd,"-qq","-d",t.tmpDir);
 			if (e) arg=util.add(arg,"-P",p);
 			arg=util.add(arg,a);
-			done=util.exec(arg,false,null);
+			done=util.exec(arg,true,null);
 		}
 
 		cmd=util.bsdTar();
 		if (!done&&cmd!=null) {
 			arg=util.sa(cmd,"-xf",a,"-C",t.tmpDir);
-			done=util.exec(arg,false,null);
+			done=util.exec(arg,true,null);
 		}
 
 		cmd=util.gnuTar();
 		if (!done&&cmd!=null) {
 			arg=util.sa(cmd,"-xf",a,"-C",t.tmpDir);
-			done=util.exec(arg,false,null);
+			done=util.exec(arg,true,null);
 		}
 
 		cmd=util.which("7z");
@@ -203,7 +203,7 @@ public class expand {
 			arg=util.sa(cmd,"x","-t7z","-o"+t.tmpDir);
 			if (e) arg=util.add(arg,"-p"+p);
 			arg=util.add(arg,a);
-			done=util.exec(arg,false,null);
+			done=util.exec(arg,true,null);
 		}
 
 		return done;

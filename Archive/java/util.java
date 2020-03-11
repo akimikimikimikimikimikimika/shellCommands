@@ -83,7 +83,6 @@ public class util {
 		}catch(Exception e){return false;}
 		return true;
 	}
-
 	public static boolean rm(String f) {
 		return rm(new File(f));
 	}
@@ -173,7 +172,7 @@ public class util {
 			ProcessBuilder.Redirect.INHERIT :
 			ProcessBuilder.Redirect.DISCARD
 		);
-		pb.redirectOutput(verbose>1 ?
+		pb.redirectOutput(verbose>1||!quiet ?
 			ProcessBuilder.Redirect.INHERIT :
 			ProcessBuilder.Redirect.DISCARD
 		);
@@ -274,6 +273,11 @@ public class util {
 	public static String[] add(String[] exist,String ...nv) {
 		ArrayList<String> al = sl(exist);
 		for (String v:nv) al.add(v);
+		return al.toArray(new String[al.size()]);
+	}
+	public static String[] add(String[] exist,List<String> nv) {
+		ArrayList<String> al = sl(exist);
+		al.addAll(nv);
 		return al.toArray(new String[al.size()]);
 	}
 
@@ -389,7 +393,8 @@ public class util {
 
 			boolean match=false;
 
-			if (a.equals("--")) noSwitches=match=true;
+			if (eq(a,"--")) noSwitches=match=true;
+			if (a.isEmpty()) match=true;
 
 			if (!noSwitches) {
 

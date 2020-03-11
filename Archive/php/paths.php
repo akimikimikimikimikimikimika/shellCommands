@@ -43,19 +43,11 @@ class Paths {
 		$d=&static::$d;
 		$t=bsdTar();
 		if ($t) {
-			$l=getData([$t,"-tf",$d["archive"]]);
-			if ($l) {
-				println($l);
-				return true;
-			}
+			if (exec([$t,"-tf",$d["archive"]])) return true;
 		}
 		$t=gnuTar();
 		if ($t) {
-			$l=getData([$t,"-tf",$d["archive"]]);
-			if ($l) {
-				println($l);
-				return true;
-			}
+			if (exec([$t,"-tf",$d["archive"]])) return true;
 		}
 		return false;
 	}

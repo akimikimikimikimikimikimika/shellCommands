@@ -59,8 +59,9 @@ def detect(path):
 	if tf.is_tarfile(path): return "tar"
 	else: return None
 
-def exec(cmd):
-	p=subprocess.Popen(cmd,stdin=None,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,env=env)
+def exec(cmd,quiet=False):
+	out=subprocess.DEVNULL if quiet else None
+	p=subprocess.Popen(cmd,stdin=None,stdout=out,stderr=subprocess.DEVNULL,env=env)
 	p.wait()
 	return p.returncode
 
@@ -140,6 +141,7 @@ def switches(d,params,inputs,max=0):
 		match=False
 
 		if a=="--": noSwitches=match=True
+		if a=="": match=True
 
 		if not noSwitches:
 

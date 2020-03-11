@@ -389,14 +389,13 @@ public class create {
 			util.Temp tmp=new util.Temp();
 			String ap=util.concatPath(tmp.tmpDir,".archive");
 			if (util.slCast(d.get("inFile")).size()>0) {
-				ArrayList<String> arg=util.sl(cmd,"a","-tzip",ap,"-sas","-xr!.DS_Store","-mx="+l,"-mm="+m);
+				String[] arg=util.sa(cmd,"a","-tzip",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-mm="+m);
 				if (util.str2bool(d.get("encrypted"))) {
 					String p=util.password();
-					arg.add("-mem="+e);
-					arg.add("-p"+p);
+					util.add(arg,"-mem="+e,"-p"+p);
 				}
-				arg.addAll(util.slCast(d.get("inFile")));
-				if (!util.exec(arg.toArray(new String[arg.size()]),true,null)) {
+				util.add(arg,util.slCast(d.get("inFile")));
+				if (!util.exec(arg,true,null)) {
 					tmp.done();
 					util.error("7zでエラーが発生しました");
 				}
@@ -414,15 +413,12 @@ public class create {
 			util.Temp tmp=new util.Temp();
 			String ap=util.concatPath(tmp.tmpDir,".archive");
 			if (util.slCast(d.get("inFile")).size()>0) {
-				ArrayList<String> arg=util.sl(cmd,ap,"-qr");
-				arg.addAll(util.slCast(d.get("inFile")));
-				if (util.eq(m,"deflate","bzip2")) arg.add("-"+l);
-				if (util.str2bool(d.get("encrypted"))) {
-					String p=util.password();
-					arg.add("-P");arg.add(p);
-				}
-				arg.addAll(Arrays.asList("-x",".DS_Store","-Z",m));
-				if (!util.exec(arg.toArray(new String[arg.size()]),false,null)) {
+				String[] arg=util.sa(cmd,ap,"-qr");
+				util.add(arg,util.slCast(d.get("inFile")));
+				if (util.eq(m,"deflate","bzip2")) util.add(arg,"-"+l);
+				if (util.str2bool(d.get("encrypted"))) util.add(arg,"-P",util.password());
+				util.add(arg,"-x",".DS_Store","-Z",m);
+				if (!util.exec(arg,true,null)) {
 					tmp.done();
 					util.error("zipでエラーが発生しました");
 				}
@@ -440,21 +436,21 @@ public class create {
 			util.Temp tmp=new util.Temp();
 			String ap=util.concatPath(tmp.tmpDir,".archive.zip");
 
-			ArrayList<String> arg=util.sl(cmd,"-a","-cf",ap,"--options","zip:compression="+m);
-			if (util.str2bool(d.get("encrypted"))) arg.set(5,arg.get(5)+",zip:encryption="+e);
-			arg.addAll(Arrays.asList("--exclude",".DS_Store"));
+			String[] arg=util.sa(cmd,"-a","-cf",ap,"--options","zip:compression="+m);
+			if (util.str2bool(d.get("encrypted"))) arg[5]+=",zip:encryption="+e;
+			util.add(arg,"--exclude",".DS_Store");
 
 			if (util.slCast(d.get("inFile")).size()>0) {
-				arg.addAll(util.slCast(d.get("inFile")));
-				if (!util.exec(arg.toArray(new String[arg.size()]),false,null)) {
+				util.add(arg,util.slCast(d.get("inFile")));
+				if (!util.exec(arg,true,null)) {
 					tmp.done();
 					util.error("tarでエラーが発生しました");
 				}
 			}
 			else {
 				tmp.blank();
-				arg.addAll(Arrays.asList("--exclude",".blank",".blank"));
-				util.exec(arg.toArray(new String[arg.size()]),true,tmp.tmpDir);
+				util.add(arg,"--exclude",".blank",".blank");
+				util.exec(arg,true,tmp.tmpDir);
 			}
 			util.mv(ap,util.strCast(d.get("archive")));
 			tmp.done();
@@ -545,9 +541,9 @@ public class create {
 			util.Temp tmp=new util.Temp();
 			String ap=util.concatPath(tmp.tmpDir,".archive");
 			if (util.slCast(d.get("inFile")).size()>0) {
-				ArrayList<String> arg=util.sl(cmd,"a","-ttar",ap,"-sas");
-				arg.addAll(util.slCast(d.get("inFile")));
-				if (!util.exec(arg.toArray(new String[arg.size()]),true,null)) {
+				String[] arg=util.sa(cmd,"a","-ttar",ap,"-bso0","-bsp0","-sas");
+				util.add(arg,util.slCast(d.get("inFile")));
+				if (!util.exec(arg,true,null)) {
 					tmp.done();
 					util.error("7zでエラーが発生しました");
 				}
@@ -569,23 +565,23 @@ public class create {
 			util.Temp tmp=new util.Temp();
 			String ap=util.concatPath(tmp.tmpDir,".archive");
 
-			ArrayList<String> arg=util.sl(cmd,"-cf",ap,"--format",f);
+			String[] arg=util.sa(cmd,"-cf",ap,"--format",f);
 			if (util.str2bool(d.get("excludeHiddenFiles"))) {
-				arg.addAll(Arrays.asList("--exclude",".DS_Store"));
+				util.add(arg,"--exclude",".DS_Store");
 				util.env.put("COPYFILE_DISABLE","1");
 			}
 
 			if (util.slCast(d.get("inFile")).size()>0) {
-				arg.addAll(util.slCast(d.get("inFile")));
-				if (!util.exec(arg.toArray(new String[arg.size()]),false,null)) {
+				util.add(arg,util.slCast(d.get("inFile")));
+				if (!util.exec(arg,true,null)) {
 					tmp.done();
 					util.error("tarでエラーが発生しました");
 				}
 			}
 			else {
 				tmp.blank();
-				arg.addAll(Arrays.asList("--exclude",".blank",".blank"));
-				util.exec(arg.toArray(new String[arg.size()]),true,tmp.tmpDir);
+				util.add(arg,"--exclude",".blank",".blank");
+				util.exec(arg,true,tmp.tmpDir);
 			}
 			if (m.compressCmd!=null) {
 				compress(m.compressCmd,l,ap,tmp);
@@ -673,14 +669,13 @@ public class create {
 			util.Temp tmp=new util.Temp();
 			String ap=util.concatPath(tmp.tmpDir,".archive");
 			if (util.slCast(d.get("inFile")).size()>0) {
-				ArrayList<String> arg=util.sl(cmd,"a","-t7z",ap,"-sas","-xr!.DS_Store","-mx="+l,"-m0="+m);
+				String[] arg=util.sa(cmd,"a","-t7z",ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx="+l,"-m0="+m);
 				if (util.str2bool(d.get("encrypted"))) {
-					String p=util.password();
-					arg.add("-p"+p);
-					if (he) arg.add("-mhe=on");
+					util.add(arg,"-p"+util.password());
+					if (he) util.add(arg,"-mhe=on");
 				}
-				arg.addAll(util.slCast(d.get("inFile")));
-				if (!util.exec(arg.toArray(new String[arg.size()]),true,null)) {
+				util.add(arg,util.slCast(d.get("inFile")));
+				if (!util.exec(arg,true,null)) {
 					tmp.done();
 					util.error("7zでエラーが発生しました");
 				}
@@ -698,20 +693,20 @@ public class create {
 			util.Temp tmp=new util.Temp();
 			String ap=util.concatPath(tmp.tmpDir,".archive.7z");
 
-			ArrayList<String> arg=util.sl(cmd,"-a","-cf",ap);
-			arg.addAll(Arrays.asList("--exclude",".DS_Store"));
+			String[] arg=util.sa(cmd,"-a","-cf",ap);
+			util.add(arg,"--exclude",".DS_Store");
 
 			if (util.slCast(d.get("inFile")).size()>0) {
-				arg.addAll(util.slCast(d.get("inFile")));
-				if (!util.exec(arg.toArray(new String[arg.size()]),false,null)) {
+				util.add(arg,util.slCast(d.get("inFile")));
+				if (!util.exec(arg,true,null)) {
 					tmp.done();
 					util.error("tarでエラーが発生しました");
 				}
 			}
 			else {
 				tmp.blank();
-				arg.addAll(Arrays.asList("--exclude",".blank",".blank"));
-				util.exec(arg.toArray(new String[arg.size()]),true,tmp.tmpDir);
+				util.add(arg,"--exclude",".blank",".blank");
+				util.exec(arg,true,tmp.tmpDir);
 			}
 			util.mv(ap,util.strCast(d.get("archive")));
 			tmp.done();

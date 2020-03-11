@@ -317,7 +317,7 @@ class Create {
 				$tmp=new Temp();
 				$ap=concatPath($tmp->tmpDir,".archive");
 				if (count($d["inFile"])>0) {
-					$arg=[$cmd,"a","-tzip",$ap,"-sas","-xr!.DS_Store","-mx=".$l,"-mm=".$m];
+					$arg=[$cmd,"a","-tzip",$ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx=".$l,"-mm=".$m];
 					if ($d["encrypted"]) {
 						$p=password();
 						array_push($arg,"-mem=".$e,"-p".$p);
@@ -351,7 +351,7 @@ class Create {
 					if ($d["encrypted"]) array_push($arg,"-p",password());
 					array_push($arg,"-x",".DS_Store");
 					array_push($arg,"-Z",$m);
-					if (execute($arg)!=0){
+					if (execute($arg,true)!=0){
 						$tmp->done();
 						error("zipでエラーが発生しました");
 					}
@@ -379,7 +379,7 @@ class Create {
 
 				if (count(d["inFile"])>0) {
 					$arg=array_merge($arg,$d["inFile"]);
-					if (execute($arg)!=0) {
+					if (execute($arg,true)!=0) {
 						$tmp->done();
 						error("tarでエラーが発生しました");
 					}
@@ -497,7 +497,7 @@ class Create {
 				$tmp=new Temp();
 				$ap=concatPath($tmp->tmpDir,".archive");
 				if (count($d["inFile"])>0) {
-					$arg=[$cmd,"a","-ttar",$ap,"-sas"];
+					$arg=[$cmd,"a","-ttar",$ap,"-bso0","-bsp0","-sas"];
 					if ($d["excludeHiddenFiles"]) array_push($arg,"-xr!.DS_Store");
 					$arg=array_merge($arg,$d["inFile"]);
 					if (execute($arg,true)!=0) {
@@ -639,7 +639,7 @@ class Create {
 				$tmp=new Temp();
 				$ap=concatPath($tmp->tmpDir,".archive");
 				if (count($d["inFile"])>0) {
-					$arg=[$cmd,"a","-t7z",$ap,"-sas","-xr!.DS_Store","-mx=".$l,"-m0=".$m];
+					$arg=[$cmd,"a","-t7z",$ap,"-bso0","-bsp0","-sas","-xr!.DS_Store","-mx=".$l,"-m0=".$m];
 					if ($d["encrypted"]) {
 						$p=password();
 						array_push($arg,"-p".$p);
@@ -673,7 +673,7 @@ class Create {
 
 				if (count($d["inFile"])>0){
 					$arg=array_merge($arg,$d["inFile"]);
-					if (execute($arg)!=0) {
+					if (execute($arg,true)!=0) {
 						$tmp->done();
 						error("tarでエラーが発生しました");
 					}
