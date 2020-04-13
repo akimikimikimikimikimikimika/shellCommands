@@ -5,7 +5,7 @@
 
 option := -std=${std} -O3
 
-src = $(shell find . -name "*.${ext}")
+src = $(shell find . -path "*/*.${ext}")
 obj = ${src:%.${ext}=%.o}
 
 ${obj}: %.o: %.${ext} # compiling
@@ -26,3 +26,9 @@ build-clang:
 	@make build -e cmd=clang ext=c std=c17 binFile=../bin/measure-c
 build-gcc:
 	@make build -e cmd=gcc ext=c std=c17 binFile=../bin/measure-c
+build-swift:
+	@swiftc *.swift -o ../bin/measure-swift
+build-go:
+	@go build -o ../bin/measure-go *.go
+build-rust:
+	@rustc *.rs -o ../bin/measure-rs

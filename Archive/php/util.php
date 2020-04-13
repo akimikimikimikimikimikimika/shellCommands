@@ -85,12 +85,12 @@ function error($text) {
 function execute($cmd,$quiet=false) {
 	global $env;
 
-	if ($quiet) $f=[
+	if ($quiet) $d=[
 		0=>STDIN,
 		1=>["file","/dev/null","w"],
 		2=>["file","/dev/null","w"]
 	];
-	else $f=[
+	else $d=[
 		0=>STDIN,
 		1=>STDOUT,
 		2=>["file","/dev/null","w"]

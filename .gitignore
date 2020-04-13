@@ -3,8 +3,6 @@
 *.o
 Random/Cargo/target.zip
 bin/appearance
-bin/measure-c
-bin/measure-cpp
 bin/mui
 bin/random
 bin/random-c
@@ -16,4 +14,5 @@ bin/random-swift
 bin/thread
 bin/trash
 Archive/java/*.class
+Time Measurement/C2
 __pycache__

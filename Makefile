@@ -20,6 +20,12 @@ measure-cpp:
 	@cd Time\ Measurement && make build-${cpp}
 measure-c:
 	@cd Time\ Measurement && make build-${c}
+measure-swift:
+	@cd Time\ Measurement && make build-swift
+measure-go:
+	@cd Time\ Measurement && make build-go
+measure-rs:
+	@cd Time\ Measurement && make build-rust
 
 random-cpp:
 	@cd Random && make build-${cpp}

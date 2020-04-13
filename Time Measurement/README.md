@@ -5,10 +5,11 @@
 ### 使い方
 
 ```sh
-measure someCommand arg1 arg2...
+measure [options] someCommand arg1 arg2...
 ```
 この操作により, `someCommand` を実行し,その所要時間を表示します。<br>
-`arg1 arg2...` はそのままコマンドに引数として渡されます。
+`arg1 arg2...` はそのままコマンドに引数として渡されます。<br>
+バージョン2より有効な `[options]` の指定により動作をカスタマイズできます。
 
 ### 計測可能域
 
@@ -16,9 +17,23 @@ measure someCommand arg1 arg2...
 
 ### ソースコード
 
-このプログラムはC,C++,Rubyの3つのバージョンが存在します。<br>
-Rubyは簡易的にテストするために書かれており,確実性も高いと思われます。CやC++はコンパイルして利用するため,場合によっては高速に動作します。<br>
-`measure`と指定すると,Cのバイナリが実行されます。バージョンを指定して実行する場合は,それぞれ`measure-c`,`measure-cpp`,`measure-ruby` と指定します。
+このプログラムは様々な言語のバージョンが存在します。<br>
+それぞれ異なるコマンドが用意されているため,言語を指定して利用することもできます<br>
+言語によってバージョンが異なるので注意してください。使える機能が異なります。<br>
+`measure`と指定すると,Cのバイナリ (`measure-c`) が実行されます。
+
+| コマンド | 言語 | バージョン |
+|:-:|:-:|:-:|
+| `measure` | C | 1.0 |
+| `measure-c` | C | 1.0 |
+| `measure-cpp` | C++ | 1.0 |
+| `measure-go` | Go | 2.0 |
+| `measure-swift` | Swift | 2.0 |
+| `measure-rs` | Rust | 2.0 |
+| `measure-py` | Python | 2.0 |
+| `measure-js` | JavaScript | 2.0 |
+| `measure-rb` | Ruby | 2.0 |
+| `measure-php` | PHP | 2.0 |
 
 ### コンパイル
 
@@ -26,5 +41,7 @@ Rubyは簡易的にテストするために書かれており,確実性も高い
 cd "Time Measurement"
 make build-clang++ / make build-g++
 make build-clang   / make build-gcc
-clang++ *.cpp -o ../bin/measure-cpp -std=c++2a -O3
+make build-go
+make build-rs
+make build-swift
 ```
