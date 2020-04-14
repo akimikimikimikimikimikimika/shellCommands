@@ -18,8 +18,12 @@ function argAnalyze() {
 	let l=process.argv;
 	l.splice(0,2);
 	if (l.length==0) error("引数が不足しています");
-	else if (l[0]=="-h" || l[0]=="help" || l[0]=="-help" || l[0]=="--help") help();
-	else if (l[0]=="-v" || l[0]=="version" || l[0]=="-version" || l[0]=="--version") version();
+	else {
+		switch (l[0]) {
+			case "-h": case "help": case "-help": case "--help": help();
+			case "-v": case "version": case "-version": case "--version": version();
+		}
+	}
 	var noFlags=false,key=null;
 	for (a of l) {
 		if (noFlags) {command.push(a);continue;}
@@ -33,12 +37,10 @@ function argAnalyze() {
 			continue;
 		}
 		switch (a) {
-			case "-stdout": case "-stderr":  case "-result":
-				key=a.replace("-","");
-				break;
-			case "-multiple":
-				multiple=true;
-				break;
+			case "-o": case "-out": case "-stdout": key="stdout"; break;
+			case "-e": case "-err": case "-stderr": key="stderr"; break;
+			case "-r": case "-result": key="result"; break;
+			case "-m": case "-multiple": multiple=true; break;
 			default:
 				noFlags=true;
 				command.push(a);
@@ -147,7 +149,8 @@ function help() {
 
 		  オプション
 
-		   -out,-err
+		   -o,-out,-stdout
+		   -e,-err,-stderr
 		    標準出力,標準エラー出力の出力先を指定します
 		    指定しなければ inherit になります
 		    • inherit
@@ -157,15 +160,16 @@ function help() {
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -result
-		    標準出力,標準エラー出力,実行結果の出力先を指定します
+		   -r,-result
+		    実行結果の出力先を指定します
 		    指定しなければ stderr になります
 		    • stdout,stderr
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -multiple
+		   -m,-multiple
 		    複数のコマンドを実行します
+		    通常はシェル経由で実行されます
 		    例えば measure echo 1 と指定していたのを
 
 		     measure -multiple "echo 1" "echo 2"

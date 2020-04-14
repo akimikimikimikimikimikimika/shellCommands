@@ -24,19 +24,15 @@ def argAnalyze():
 	key=None
 	for a in l:
 		if noFlags: command.append(a)
-		elif key=="stdout":
-			out=a
+		elif key!=None:
+			if key=="stdout": out=a
+			if key=="stderr": err=a
+			if key=="result": result=a
 			key=None
-		elif key=="stderr":
-			err=a
-			key=None
-		elif key=="result":
-			result=a
-			key=None
-		elif a=="-stdout": key="stdout"
-		elif a=="-stderr": key="stderr"
-		elif a=="-result": key="result"
-		elif a=="-multiple": multiple=True
+		elif a=="-o" or a=="-our" or a=="-stdout": key="stdout"
+		elif a=="-e" or a=="-err" or a=="-stderr": key="stderr"
+		elif a=="-r" or a=="-result": key="result"
+		elif a=="-m" or a=="-multiple": multiple=True
 		else:
 			noFlags=False
 			command.append(a)
@@ -105,7 +101,7 @@ class execute:
 		r=(r-v)*60
 		v=floor(r)
 		if v>=1: t+="{:.0f}s ".format(v)
-		t+="{:.3f}ms".format(td.microseconds/1000)
+		t+="{:.3f}ms".format(td.microseconds/1e+3)
 		return t
 
 def error(text):
@@ -123,7 +119,8 @@ def help():
 
 		  オプション
 
-		   -out,-err
+		   -o,-out,-stdout
+		   -e,-err,-stderr
 		    標準出力,標準エラー出力の出力先を指定します
 		    指定しなければ inherit になります
 		    • inherit
@@ -133,15 +130,16 @@ def help():
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -result
-		    標準出力,標準エラー出力,実行結果の出力先を指定します
+		   -r,-result
+		    実行結果の出力先を指定します
 		    指定しなければ stderr になります
 		    • stdout,stderr
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -multiple
+		   -m,-multiple
 		    複数のコマンドを実行します
+		    通常はシェル経由で実行されます
 		    例えば measure echo 1 と指定していたのを
 
 		     measure -multiple "echo 1" "echo 2"

@@ -9,8 +9,13 @@ func argAnalyze() {
 	var l=CommandLine.arguments
 	l.removeFirst()
 	if l.count==0 { let _=exitWithError("引数が不足しています") }
-	else if l[0]=="-h" || l[0]=="help" || l[0]=="-help" || l[0]=="--help" { help() }
-	else if l[0]=="-v" || l[0]=="version" || l[0]=="-version" || l[0]=="--version" { version() }
+	else {
+		switch l[0] {
+			case "-h","help","-help","--help": help()
+			case "-v","version","-version","--version": version()
+			default: break
+		}
+	}
 	var noFlags = false
 	var key:AK? = nil
 	for a in l {
@@ -20,23 +25,22 @@ func argAnalyze() {
 		}
 		if let k = key {
 			switch k {
-				case .stdout: out=CO.s2co(a)
-				case .stderr: err=CO.s2co(a)
-				case .result: result=RO.s2ro(a)
+				case .stdout: out = CO.s2co(a)
+				case .stderr: err = CO.s2co(a)
+				case .result: result = RO.s2ro(a)
 			}
 			key=nil
 			continue
 		}
-		if let k = AK(rawValue:a) {
-			key = k
-			continue
+		switch a {
+			case "-o","-out","-stdout": key = .stdout
+			case "-e","-err","-stderr": key = .stderr
+			case "-r","-result": key = .result
+			case "-m","-multiple": multiple = true
+			default:
+				noFlags=true
+				command.append(a)
 		}
-		if a=="-multiple" {
-			multiple=true
-			continue
-		}
-		noFlags=true
-		command.append(a)
 	}
 	if command.count==0 { let _=exitWithError("実行する内容が指定されていません") }
 }
@@ -47,8 +51,8 @@ class execute {
 	init() {
 
 		let i=FH.standardInput
-		let o=out.co2fh
-		let e=err.co2fh
+		let o=out.co2fh(.stdout)
+		let e=err.co2fh(.stderr)
 		let r=result.ro2fh
 
 		var ec:Int32?=0 // exit code
@@ -148,7 +152,8 @@ func help() {
 
 		  オプション
 
-		   -out,-err
+		   -o,-out,-stdout
+		   -e,-err,-stderr
 		    標準出力,標準エラー出力の出力先を指定します
 		    指定しなければ inherit になります
 		    • inherit
@@ -158,15 +163,16 @@ func help() {
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -result
-		    標準出力,標準エラー出力,実行結果の出力先を指定します
+		   -r,-result
+		    実行結果の出力先を指定します
 		    指定しなければ stderr になります
 		    • stdout,stderr
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -multiple
+		   -m,-multiple
 		    複数のコマンドを実行します
+		    通常はシェル経由で実行されます
 		    例えば measure echo 1 と指定していたのを
 
 		     measure -multiple "echo 1" "echo 2"
@@ -220,9 +226,14 @@ class Util {
 				default: return .file(text)
 			}
 		}
-		var co2fh:FH {
+		func co2fh(_ t:Util.ResultOutput) -> FH {
 			switch self {
-				case .inherit: return FH.standardOutput
+				case .inherit:
+					switch t {
+						case .stdout: return FH.standardOutput
+						case .stderr: return FH.standardError
+						default: return exitWithError("unknown error") as! FH
+					}
 				case .discard: return FH.nullDevice
 				case let .file(f): return Util.fh(f)
 			}
@@ -247,10 +258,10 @@ class Util {
 			}
 		}
 	}
-	enum AnalyzeKey:String {
-		case stdout="-stdout"
-		case stderr="-stderr"
-		case result="-result"
+	enum AnalyzeKey {
+		case stdout
+		case stderr
+		case result
 	}
 	private static func fh(_ path:String) -> FH {
 		return FH(forUpdatingAtPath:path) ?? (exitWithError("指定したパスには書き込みできません: \(path)") as! FH)

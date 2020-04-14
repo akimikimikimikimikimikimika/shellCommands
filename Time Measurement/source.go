@@ -17,9 +17,13 @@ func main() {
 
 func argAnalyze(d *Data) {
 	l := os.Args[1:]
-	if len(l)==0 { error("引数が不足しています") } else
-	if l[0]=="-h" || l[0]=="help" || l[0]=="-help" ||l[0]=="--help" { help() } else
-	if l[0]=="-v" || l[0]=="version" || l[0]=="-version" ||l[0]=="--version" { version() }
+	if len(l)==0 { error("引数が不足しています") } else {
+		switch l[0] {
+			case "-h","help","-help","--help": help()
+			case "-v","version","-version","--version": version()
+			default:
+		}
+	}
 	var noFlags = false
 	var key AnalyzeKey = AKNone
 	for _,a := range l {
@@ -37,10 +41,10 @@ func argAnalyze(d *Data) {
 			continue
 		}
 		switch a {
-			case "-stdout": key=AKOut
-			case "-stderr": key=AKErr
-			case "-result": key=AKResult
-			case "-multiple": d.multiple=true
+			case "-o","-out","-stdout": key=AKOut
+			case "-e","-err","-stderr": key=AKErr
+			case "-r","-result": key=AKResult
+			case "-m","-multiple": d.multiple=true
 			default:
 				noFlags=true
 				d.command=append(d.command,a)
@@ -58,8 +62,8 @@ func (x execute) main(d *Data) {
 		if len(args)==1 { cmd=exec.Command(args[0]) } else
 		{ cmd=exec.Command(args[0],args[1:]...) }
 		cmd.Stdin=i
-		cmd.Stdout=o
-		cmd.Stderr=e
+		if o!=nil { cmd.Stdout=o }
+		if e!=nil { cmd.Stderr=e }
 		return cmd
 	}
 	if d.multiple {
@@ -129,7 +133,8 @@ func help() {
 
 		  オプション
 
-		   -out,-err
+		   -o,-out,-stdout
+		   -e,-err,-stderr
 		    標準出力,標準エラー出力の出力先を指定します
 		    指定しなければ inherit になります
 		    • inherit
@@ -139,15 +144,16 @@ func help() {
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -result
-		    標準出力,標準エラー出力,実行結果の出力先を指定します
+		   -r,-result
+		    実行結果の出力先を指定します
 		    指定しなければ stderr になります
 		    • stdout,stderr
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -multiple
+		   -m,-multiple
 		    複数のコマンドを実行します
+		    通常はシェル経由で実行されます
 		    例えば measure echo 1 と指定していたのを
 
 		     measure -multiple "echo 1" "echo 2"

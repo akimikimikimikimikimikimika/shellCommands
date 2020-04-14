@@ -14,8 +14,11 @@ end
 def argAnalyze
 	l=ARGV
 	if l.length==0 then error "引数が不足しています"
-	elsif l[0]=="-h" || l[0]=="help" || l[0]=="-help" || l[0]=="--help" then help
-	elsif l[0]=="-v" || l[0]=="version" || l[0]=="-version" || l[0]=="--version" then version
+	else
+		case l[0]
+			when "-h","help","-help","--help" then help()
+			when "-v","version","-version","--version" then version()
+		end
 	end
 	noFlags=false
 	key=nil
@@ -34,10 +37,10 @@ def argAnalyze
 			next
 		end
 		case a
-			when "-stdout" then key=:stdout
-			when "-stderr" then key=:stderr
-			when "-result" then key=:result
-			when "-multiple" then $multiple=true
+			when "-o","-out","-stdout" then key=:stdout
+			when "-e","-err","-stderr" then key=:stderr
+			when "-r","-result" then key=:result
+			when "-m","-multiple" then $multiple=true
 			else
 				noFlags=true
 				$command.push a
@@ -63,7 +66,7 @@ class Execute
 			end
 			en=Time.now
 			r.puts "time: "+(descTime en-st)
-			pl.length.times { |n| r.puts "process#{n+1} id: "+pid[n].to_s }
+			pl.length.times { |n| r.puts "process#{n+1} id: "+pl[n].to_s }
 			r.puts "exit code: "+ec.to_s
 		else
 			st=Time.now
@@ -138,7 +141,8 @@ def help
 
 		  オプション
 
-		   -out,-err
+		   -o,-out,-stdout
+		   -e,-err,-stderr
 		    標準出力,標準エラー出力の出力先を指定します
 		    指定しなければ inherit になります
 		    • inherit
@@ -148,15 +152,16 @@ def help
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -result
-		    標準出力,標準エラー出力,実行結果の出力先を指定します
+		   -r,-result
+		    実行結果の出力先を指定します
 		    指定しなければ stderr になります
 		    • stdout,stderr
 		    • [file path]
 		     指定したファイルに書き出します (追記)
 
-		   -multiple
+		   -m,-multiple
 		    複数のコマンドを実行します
+		    通常はシェル経由で実行されます
 		    例えば measure echo 1 と指定していたのを
 
 		     measure -multiple "echo 1" "echo 2"
