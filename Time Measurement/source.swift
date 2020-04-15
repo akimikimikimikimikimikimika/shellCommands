@@ -1,14 +1,16 @@
+#! /usr/bin/env swift
+
 import Foundation
 
 func main() {
 	argAnalyze()
-	let _ = execute()
+	execute()
 }
 
 func argAnalyze() {
 	var l=CommandLine.arguments
 	l.removeFirst()
-	if l.count==0 { let _=exitWithError("引数が不足しています") }
+	if l.count==0 { exitWithError("引数が不足しています") }
 	else {
 		switch l[0] {
 			case "-h","help","-help","--help": help()
@@ -42,13 +44,13 @@ func argAnalyze() {
 				command.append(a)
 		}
 	}
-	if command.count==0 { let _=exitWithError("実行する内容が指定されていません") }
+	if command.count==0 { exitWithError("実行する内容が指定されていません") }
 }
 
 class execute {
 
 	// main function
-	init() {
+	@discardableResult init() {
 
 		let i=FH.standardInput
 		let o=out.co2fh(.stdout)
@@ -106,7 +108,7 @@ class execute {
 			p.waitUntilExit()
 			ec = p.terminationReason == .exit ? p.terminationStatus : nil
 		}
-		catch{ let _ = exitWithError("実行に失敗しました") }
+		catch{ exitWithError("実行に失敗しました") }
 	}
 
 	private func descEC(_ ec:Int32?)->String {
@@ -193,7 +195,7 @@ func version() {
 	exit(0)
 }
 
-func exitWithError(_ text:String) -> Any {
+@discardableResult func exitWithError(_ text:String) -> Any {
 	FH.standardError.write((text+"\n").data(using:.utf8) ?? Data())
 	exit(1)
 }
@@ -212,6 +214,8 @@ func replace(_ of:String,_ with:String,_ text:String)->String {
 func write(_ fh:FH,_ text:String) {
 	fh.write(text.data(using:.utf8) ?? Data())
 }
+
+
 
 typealias FH = FileHandle
 class Util {
@@ -263,8 +267,24 @@ class Util {
 		case stderr
 		case result
 	}
+	private static let fm=FileManager.default
+	private static var opened:[String:FH] = [:]
 	private static func fh(_ path:String) -> FH {
-		return FH(forUpdatingAtPath:path) ?? (exitWithError("指定したパスには書き込みできません: \(path)") as! FH)
+		if let f=opened[path] { return f }
+		var v=true
+		if !fm.fileExists(atPath:path) {
+			v=fm.createFile(atPath:path,contents:nil,attributes:nil)
+		}
+		if v {
+			if let f=FH(forWritingAtPath:path) {
+				opened[path]=f
+				do {
+					try f.seekToEnd()
+					return f
+				} catch {}
+			}
+		}
+		return exitWithError("指定したパスには書き込みできません: \(path)") as! FH
 	}
 }
 typealias CO = Util.ChildOutput

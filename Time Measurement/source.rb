@@ -52,6 +52,7 @@ end
 class Execute
 
 	def initialize
+		@opened=Hash.new
 		o=co2f $out,:out
 		e=co2f $err,:err
 		r=ro2f $result
@@ -99,8 +100,9 @@ class Execute
 	end
 
 	def fh(path)
+		if @opened.has_key? path then return @opened[path] end
 		begin
-			File.open(path,"a")
+			@opened[path]=File.open(path,"a")
 		rescue
 			error("指定したパスには書き込みできません: "+path)
 		end
@@ -114,10 +116,14 @@ class Execute
 
 	def descTime(sec)
 		t=""
-		if sec/3600>=1 then t+="#{(sec/3600).floor}h " end
-		if sec/60>=1 then t+="#{(sec/60).floor%60}m " end
-		if sec>=1 then t+="#{sec.floor%60}s " end
-		t+="#{sprintf("%.3f",(sec*1000)%1000)}ms"
+		r=sec/3600;v=r.floor
+		if v>=1 then t+="#{v}h " end
+		r=(r-v)*60;v=r.floor
+		if v>=1 then t+="#{v}m " end
+		r=(r-v)*60;v=r.floor
+		if v>=1 then t+="#{v}s " end
+		r=(r-v)*1000
+		t+="#{sprintf("%.3f",r)}ms"
 		t
 	end
 

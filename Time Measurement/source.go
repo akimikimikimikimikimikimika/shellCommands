@@ -204,6 +204,7 @@ type Data struct {
 	err string
 	result string
 	multiple bool
+	opened map[string]*os.File
 }
 func data() Data {
 	return Data{
@@ -212,6 +213,7 @@ func data() Data {
 		err:"inherit",
 		result:"stderr",
 		multiple:false,
+		opened:map[string]*os.File{},
 	};
 }
 func (d Data) out2f() *os.File {
@@ -236,7 +238,10 @@ func (d Data) result2f() *os.File {
 	}
 }
 func (d Data) fh(path string) *os.File {
-	f,e := os.OpenFile(path,os.O_APPEND|os.O_CREATE|os.O_WRONLY,0222)
+	ef,has := d.opened[path]
+	if has { return ef }
+	f,e := os.OpenFile(path,os.O_APPEND|os.O_CREATE|os.O_WRONLY,0644)
 	if e != nil { error("指定したパスには書き込みできません: "+path) }
+	d.opened[path]=f
 	return f
 }

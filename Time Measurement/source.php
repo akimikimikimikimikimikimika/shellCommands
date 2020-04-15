@@ -90,7 +90,7 @@ class execute {
 		switch ($d) {
 			case "inherit": return $inherit;
 			case "discard": return ["file","/dev/null","w"];
-			default: return $this->fh($out);
+			default: return $this->fh($d);
 		}
 	}
 
@@ -102,8 +102,14 @@ class execute {
 		}
 	}
 
+	private $opened=[];
 	private function fh($path) {
-		try { return fopen($path,"a"); }
+		if (array_key_exists($path,$this->opened)) return $this->opened[$path];
+		try {
+			$f=fopen($path,"a");
+			$this->opened[$path]=$f;
+			return $f;
+		}
 		catch(Exception $e){ error("指定したパスには書き込みできません: ".$path); }
 	}
 
@@ -116,13 +122,13 @@ class execute {
 	private function descTime($nSec) {
 		$t="";
 		$r=$nSec/(3600*1e+9);$v=floor($r);
-		if ($v>=1) $t.=sprintf("%.0fh ",$v);
+		if ($v>=1) $t.="${v}h ";
 		$r=($r-$v)*60;$v=floor($r);
-		if ($v>=1) $t.=sprintf("%.0fm ",$v);
+		if ($v>=1) $t.="${v}m ";
 		$r=($r-$v)*60;$v=floor($r);
-		if ($v>=1) $t.=sprintf("%.0fs ",$v);
+		if ($v>=1) $t.="${v}s ";
 		$r=($r-$v)*1000;
-		$t.=sprintf("%.6fms",$r);
+		$t.=sprintf("%.3fms",$r);
 		return $t;
 	}
 

@@ -27,8 +27,8 @@ measure [options] someCommand arg1 arg2...
 - `-r`,`-result`<br>
 	実行結果の出力先を指定します<br>
 	指定しなければ `stderr` になります<br>
-	• `stdout`,`stderr`
-	• `[file path]`
+	- `stdout`,`stderr`
+	- `[file path]`<br>
 		指定したファイルに書き出します (追記)
 
 
@@ -56,21 +56,22 @@ measure [options] someCommand arg1 arg2...
 |:-:|:-:|:-:|
 | `measure` | C | 2.0 |
 | `measure-c` | C | 2.0 |
-| `measure-cpp` | C++ | 1.0 |
+| `measure-cpp` | C++ | 2.0 |
 | `measure-go` | Go | 2.0 |
 | `measure-swift` | Swift | 2.0 |
 | `measure-rs` | Rust | 2.0 |
-| `measure-py` | Python | 2.0 |
 | `measure-js` | JavaScript | 2.0 |
+| `measure-py` | Python | 2.0 |
 | `measure-rb` | Ruby | 2.0 |
 | `measure-php` | PHP | 2.0 |
+| `measure-java` | Java | 2.0 |
 
 ### コンパイル
 
 ```sh
 cd "Time Measurement"
-make build-clang++ / make build-g++
 make build-clang   / make build-gcc
+make build-clang++ / make build-g++
 make build-go
 make build-rs
 make build-swift

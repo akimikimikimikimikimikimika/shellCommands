@@ -6,4 +6,5 @@ void help();
 void version();
 
 char* copyStr(char*);
+bool eq(char *target,...);
 void error(const char*);

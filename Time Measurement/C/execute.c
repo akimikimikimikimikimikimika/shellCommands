@@ -26,7 +26,6 @@ void checkFile(const char*);
 int fh(struct ResultOutput*);
 char* descTime(struct timespec*,struct timespec*);
 char* descEC(int);
-void pe(const char*);
 
 void execute(struct data *d) {
 	struct timespec st,en;
@@ -90,14 +89,14 @@ void connect(struct ChildOutput* co,int sfd) {
 		case COInherit: return;
 		case CODiscard:
 			fd=open("/dev/null",O_WRONLY);
-			if (fd<0) pe("出力を破棄することができません");
+			if (fd<0) error("出力を破棄することができません");
 			break;
 		case COFile:
 			fd=open(co->file,O_WRONLY|O_APPEND|O_CREAT);
 			if (fd<0) {
 				char m[60+strlen(co->file)];
 				sprintf(m,"指定したパスには書き込みできません: %s",co->file);
-				pe(m);
+				error(m);
 			}
 			break;
 	}
@@ -107,14 +106,15 @@ void connect(struct ChildOutput* co,int sfd) {
 struct status run(char *args[],struct ChildOutput *out,struct ChildOutput *err) {
 	struct status s;
 	int sv;
-	int pStdout[2];
-	int pStderr[2];
 	s.pid=fork();
-	if (s.pid<0) pe("プロセスの起動に失敗しました");
+	if (s.pid<0) error("プロセスの起動に失敗しました");
 	if (s.pid==0) {
 		connect(out,STDOUT_FILENO);
 		connect(err,STDERR_FILENO);
-		if (execvp(args[0],args)<0) pe("プロセスの実行に失敗しました");
+		if (execvp(args[0],args)<0) {
+			fputs("プロセスの実行に失敗しました\n",stderr);
+			exit(127);
+		}
 	}
 	waitpid(s.pid,&sv,0);
 	if (WIFEXITED(sv)) s.ec=WEXITSTATUS(sv);
@@ -128,7 +128,7 @@ void checkFile(const char* path) {
 		char m[60+strlen(path)];
 		strcpy(m,"指定したパスには書き込みできません: ");
 		strcat(m,path);
-		pe(m);
+		error(m);
 	}
 	fclose(f);
 }
@@ -154,7 +154,7 @@ char* descTime(struct timespec *st,struct timespec *en) {
 	if (v>=1) { sprintf(tmp,"%.0lfm ",v); strcat(t,tmp); }
 	r=(r-v)*60; v=floor(r);
 	if (v>=1) { sprintf(tmp,"%.0lfs ",v); strcat(t,tmp); }
-	sprintf(tmp,"%.6lfms",nsec/1e+6); strcat(t,tmp);
+	sprintf(tmp,"%.3lfms",nsec/1e+6); strcat(t,tmp);
 	return copyStr(t);
 }
 char* descEC(int ec) {
@@ -164,12 +164,4 @@ char* descEC(int ec) {
 		sprintf(t,"exit code: %d",ec);
 		return copyStr(t);
 	}
-}
-
-void pe(const char* text) {
-	char t[strlen(text)+2];
-	strcpy(t,text);
-	strcat(t,"\r\n");
-	perror(t);
-	exit(EXIT_FAILURE);
 }

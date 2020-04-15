@@ -87,16 +87,19 @@ let execute=(()=>{
 				${descEC(ec)}
 			`)+os.EOL);
 		}
-		if (r.close) r.close();
-		if (ec==null) ec=255;
-		process.exit(ec);
+		r.end();
+		r.on("finish",()=>{
+			if (ec==null) ec=255;
+			process.exit(ec);
+		});
+		r.on("error",()=>error("結果の出力に失敗しました"));
 	}
 
 	function co2f(d) {
 		switch (d) {
 			case "inherit": return "inherit";
 			case "discard": return "ignore";
-			default: return fh(out);
+			default: return fh(d);
 		}
 	}
 
@@ -104,13 +107,19 @@ let execute=(()=>{
 		switch (d) {
 			case "stdout": return process.stdout;
 			case "stderr": return process.stderr;
-			default: return fh(result);
+			default: return fh(d);
 		}
 	}
 
+	let opened={};
 	function fh(path) {
-		try{ return fs.createWriteStream(path,{flags:"a"}); }
-		catch(e) { error("指定したパスには書き込みできません: ".$path); }
+		if (opened[path]) return opened[path];
+		try{
+			let io=fs.createWriteStream(path,{flags:"as"});
+			opened[path]=io;
+			return io;
+		}
+		catch(e) { error("指定したパスには書き込みできません: "+path); }
 	}
 
 	function descTime(msec) {

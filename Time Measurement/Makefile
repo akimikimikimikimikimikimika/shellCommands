@@ -5,7 +5,7 @@
 
 option := -std=${std} -O3
 
-src = $(shell find . -path "*/*.${ext}")
+src = $(shell find . -path "./${searchPath}")
 obj = ${src:%.${ext}=%.o}
 
 ${obj}: %.o: %.${ext} # compiling
@@ -19,16 +19,20 @@ build: bin clean
 
 
 build-clang++:
-	@make build -e cmd="clang++ -pthread" ext=cpp std=c++2a binFile=../bin/measure-cpp
+	@make build -e cmd="clang++" ext=cpp std=c++2a binFile=../bin/measure-cpp searchPath=source.cpp
 build-g++:
-	@make build -e cmd="g++ -pthread" ext=cpp std=c++2a binFile=../bin/measure-cpp
+	@make build -e cmd="g++ -pthread -lstdc++fs" ext=cpp std=c++2a binFile=../bin/measure-cpp searchPath=source.cpp
 build-clang:
-	@make build -e cmd=clang ext=c std=c17 binFile=../bin/measure-c
+	@make build -e cmd=clang ext=c std=c17 binFile=../bin/measure-c searchPath="C/*.c"
 build-gcc:
-	@make build -e cmd=gcc ext=c std=c17 binFile=../bin/measure-c
+	@make build -e cmd=gcc ext=c std=c17 binFile=../bin/measure-c searchPath="C/*.c"
 build-swift:
 	@swiftc *.swift -o ../bin/measure-swift
 build-go:
 	@go build -o ../bin/measure-go *.go
 build-rust:
 	@rustc *.rs -o ../bin/measure-rs
+build-java:
+	@javac Measure.java
+	@jar cfe measure-java.jar Measure *.class
+	@rm -f *.class

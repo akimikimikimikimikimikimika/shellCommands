@@ -4,7 +4,7 @@ use std::process::exit;
 // convert str -> String
 macro_rules! S {
 	($text:expr) => {
-		$text.to_string()
+		String::from($text)
 	};
 }
 
@@ -194,55 +194,66 @@ mod exec {
 }
 use exec::execute;
 
-fn help() {
-	print!("{}",r#"
-		 使い方:
-		  measure [options] [command] [arg1] [arg2]…
-		  measure -multiple [options] "[command1]" "[command2]"…
+mod docs {
+	use std::process::exit;
+	pub fn help() {
+		output(S!(r#"
 
-		  [command] を実行し,最後にその所要時間を表示します
+			 使い方:
+			  measure [options] [command] [arg1] [arg2]…
+			  measure -multiple [options] "[command1]" "[command2]"…
 
-		  オプション
+			  [command] を実行し,最後にその所要時間を表示します
 
-		   -o,-out,-stdout
-		   -e,-err,-stderr
-		    標準出力,標準エラー出力の出力先を指定します
-		    指定しなければ inherit になります
-		    • inherit
-		     stdoutはstdoutに,stderrはstderrにそれぞれ出力します
-		    • discard
-		     出力しません
-		    • [file path]
-		     指定したファイルに書き出します (追記)
+			  オプション
 
-		   -r,-result
-		    実行結果の出力先を指定します
-		    指定しなければ stderr になります
-		    • stdout,stderr
-		    • [file path]
-		     指定したファイルに書き出します (追記)
+			   -o,-out,-stdout
+			   -e,-err,-stderr
+			    標準出力,標準エラー出力の出力先を指定します
+			    指定しなければ inherit になります
+			    • inherit
+			     stdoutはstdoutに,stderrはstderrにそれぞれ出力します
+			    • discard
+			     出力しません
+			    • [file path]
+			     指定したファイルに書き出します (追記)
 
-		   -m,-multiple
-		    複数のコマンドを実行します
-		    通常はシェル経由で実行されます
-		    例えば measure echo 1 と指定していたのを
+			   -r,-result
+			    実行結果の出力先を指定します
+			    指定しなければ stderr になります
+			    • stdout,stderr
+			    • [file path]
+			     指定したファイルに書き出します (追記)
 
-		     measure -multiple "echo 1" "echo 2"
+			   -m,-multiple
+			    複数のコマンドを実行します
+			    通常はシェル経由で実行されます
+			    例えば measure echo 1 と指定していたのを
 
-		    などと1つ1つのコマンドを1つの文字列として渡して実行します
-	"#.replace("\t",""));
-	exit(0);
+			     measure -multiple "echo 1" "echo 2"
+
+			    などと1つ1つのコマンドを1つの文字列として渡して実行します
+
+		"#));
+		exit(0);
+	}
+	pub fn version() {
+		output(S!(r#"
+
+			 measure v2.0
+			 Rust バージョン (measure-rs)
+
+		"#));
+		exit(0);
+	}
+	fn output(text:String) {
+		let l=text.len();
+		let mut t=text.replace("\t","");
+		t=t.chars().skip(1).take(l-2).collect();
+		print!("{}",t);
+	}
 }
-
-fn version() {
-	print!("{}",r#"
-
-		 measure v2.0
-		 Rust バージョン (measure-rs)
-
-	"#.replace("\t",""));
-	exit(0);
-}
+use docs::{help,version};
 
 mod utils {
 	use std::process::{Stdio,exit};

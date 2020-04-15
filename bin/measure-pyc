@@ -1,0 +1,30 @@
+#! sh
+
+pycPath="../Time Measurement/measure-pyc.pyc"
+
+notFoundError() {
+	echo "Javaアーカイブファイルが見つかりません" >&2
+	exit 1
+}
+
+bs=\\
+parse() {
+	local x="$(echo $1 | sed -Ee "s/$bs$bs/$bs$bs$bs$bs/g" | sed -Ee "s/$bs\"/$bs$bs\"/g" | sed -Ee "s/$bs'/$bs$bs'/g" | sed -Ee "s/$bs /$bs$bs /g")"
+	echo "$x"
+}
+
+path="$(dirname "$0")/$(dirname "$pycPath")"
+if [ ! -d "$path" ]; then
+	notFoundError
+fi
+path="$(cd "$path"; pwd)/$(basename "$pycPath")"
+if [ ! -f "$path" ]; then
+	notFoundError
+fi
+
+args="python3 `parse "$path"`"
+for x in "$@" ; do
+	args="$args `parse "$x"`"
+done
+
+exec sh -c "$args"

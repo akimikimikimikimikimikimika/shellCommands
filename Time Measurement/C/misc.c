@@ -78,6 +78,22 @@ char* copyStr(char *str) {
 	return p;
 }
 
+bool eq(char *target,...) {
+	va_list args;
+	va_start(args,target);
+	bool matched=false;
+	while (true) {
+		const char* str=va_arg(args,const char*);
+		if (str==NULL) break;
+		if (!strcmp(target,str)) {
+			matched=true;
+			break;
+		}
+	}
+	va_end(args);
+	return matched;
+}
+
 void error(const char* text) {
 	char t[strlen(text)+2];
 	strcpy(t,text);

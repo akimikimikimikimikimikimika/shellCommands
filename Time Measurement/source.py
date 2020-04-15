@@ -73,15 +73,20 @@ class execute:
 	def co2f(self,d):
 		if d=="inherit": return None
 		elif d=="discard": return subprocess.DEVNULL
-		else: return fh(out)
+		else: return self.fh(out)
 
 	def ro2f(self,d):
 		if d=="stdout": return sys.stdout
 		elif d=="stderr": return sys.stderr
-		else: return fh(d)
+		else: return self.fh(d)
 
+	__opened={}
 	def fh(self,path):
-		try: return open(path,"a")
+		if path in self.__opened: return self.__opened[path]
+		try:
+			f=open(path,"a")
+			self.__opened[path]=f
+			return f
 		except: error("指定したパスには書き込みできません: "+path)
 
 	def run(self,c,o,e,s):

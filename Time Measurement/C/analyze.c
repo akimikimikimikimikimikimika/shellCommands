@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 enum AnalyzeKey { AKNull,AKStdout,AKStderr,AKResult };
 char** copyArray(char*[],int,int);
 
@@ -9,18 +11,8 @@ void argAnalyze(struct data *d,int argc,char *argv[]) {
 	int cmdBegin=0;
 	enum AnalyzeKey key=AKNull;
 	if (argc==1) error("引数が不足しています");
-	else if (
-		!strcmp(argv[1],"-h")||
-		!strcmp(argv[1],"help")||
-		!strcmp(argv[1],"-help")||
-		!strcmp(argv[1],"--help")
-	) help();
-	else if (
-		!strcmp(argv[1],"-v")||
-		!strcmp(argv[1],"version")||
-		!strcmp(argv[1],"-version")||
-		!strcmp(argv[1],"--version")
-	) version();
+	else if (eq(argv[1],"-h","help","-help","--help",NULL)) help();
+	else if (eq(argv[1],"-v","version","-version","--version",NULL)) version();
 	for (int n=1;n<argc;n++) {
 		char* a=argv[n];
 		if (key!=AKNull) {
@@ -33,28 +25,11 @@ void argAnalyze(struct data *d,int argc,char *argv[]) {
 			key=AKNull;
 			continue;
 		}
-		if (
-			!strcmp(a,"-m")||
-			!strcmp(a,"-multiple")
-		) d->multiple=true;
-		else if (
-			!strcmp(a,"-o")||
-			!strcmp(a,"-out")||
-			!strcmp(a,"-stdout")
-		) key=AKStdout;
-		else if (
-			!strcmp(a,"-e")||
-			!strcmp(a,"-err")||
-			!strcmp(a,"-stderr")
-		) key=AKStderr;
-		else if (
-			!strcmp(a,"-r")||
-			!strcmp(a,"-result")
-		) key=AKResult;
-		else {
-			cmdBegin=n;
-			break;
-		}
+		if (eq(a,"-m","-multiple",NULL)) d->multiple=true;
+		else if (eq(a,"-o","-out","-stdout",NULL)) key=AKStdout;
+		else if (eq(a,"-e","-err","-stderr",NULL)) key=AKStderr;
+		else if (eq(a,"-r","-result",NULL)) key=AKResult;
+		else { cmdBegin=n; break; }
 	}
 	if (cmdBegin==0) error("実行する内容が指定されていません");
 	d->count=argc-cmdBegin;
