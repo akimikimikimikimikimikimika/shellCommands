@@ -46,7 +46,7 @@ def argAnalyze
 				$command.push a
 		end
 	end
-	if $command.length==0 then error "実行する内容が指定されていません" end
+	error "実行する内容が指定されていません" if $command.length==0
 end
 
 class Execute
@@ -63,7 +63,7 @@ class Execute
 			$command.each do |c|
 				pid,ec=run(c,o,e)
 				pl.push pid
-				if ec!=0 then break end
+				break if ec!=0
 			end
 			en=Time.now
 			r.puts "time: "+(descTime en-st)
@@ -100,7 +100,7 @@ class Execute
 	end
 
 	def fh(path)
-		if @opened.has_key? path then return @opened[path] end
+		return @opened[path] if @opened.has_key? path
 		begin
 			@opened[path]=File.open(path,"a")
 		rescue
@@ -117,11 +117,11 @@ class Execute
 	def descTime(sec)
 		t=""
 		r=sec/3600;v=r.floor
-		if v>=1 then t+="#{v}h " end
+		t+="#{v}h " if v>=1
 		r=(r-v)*60;v=r.floor
-		if v>=1 then t+="#{v}m " end
+		t+="#{v}m " if v>=1
 		r=(r-v)*60;v=r.floor
-		if v>=1 then t+="#{v}s " end
+		t+="#{v}s " if v>=1
 		r=(r-v)*1000
 		t+="#{sprintf("%.3f",r)}ms"
 		t

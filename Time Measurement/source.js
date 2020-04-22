@@ -69,9 +69,9 @@ let execute=(()=>{
 			}
 			let en=performance.now();
 
-			r.write("time: "+descTime(en-st)+os.EOL);
-			for (var n=0;n<pid.length;n++) r.write(`process${n+1} id:${pid[n]}`+os.EOL);
-			r.write(descEC(ec)+os.EOL);
+			fs.writeSync(r,"time: "+descTime(en-st)+os.EOL);
+			for (var n=0;n<pid.length;n++) fs.writeSync(r,`process${n+1} id:${pid[n]}`+os.EOL);
+			fs.writeSync(r,descEC(ec)+os.EOL);
 		}
 		else {
 			let st=performance.now();
@@ -81,18 +81,13 @@ let execute=(()=>{
 
 			let pid=s.pid;
 			ec=s.status;
-			r.write(clean(`
+			fs.writeSync(r,clean(`
 				time: ${descTime(en-st)}
 				process id: ${pid}
 				${descEC(ec)}
 			`)+os.EOL);
 		}
-		r.end();
-		r.on("finish",()=>{
-			if (ec==null) ec=255;
-			process.exit(ec);
-		});
-		r.on("error",()=>error("結果の出力に失敗しました"));
+		fs.closeSync(r);
 	}
 
 	function co2f(d) {
@@ -105,8 +100,8 @@ let execute=(()=>{
 
 	function ro2f(d) {
 		switch (d) {
-			case "stdout": return process.stdout;
-			case "stderr": return process.stderr;
+			case "stdout": return 1;
+			case "stderr": return 2;
 			default: return fh(d);
 		}
 	}
@@ -115,7 +110,7 @@ let execute=(()=>{
 	function fh(path) {
 		if (opened[path]) return opened[path];
 		try{
-			let io=fs.createWriteStream(path,{flags:"as"});
+			let io=fs.openSync(path,"a");
 			opened[path]=io;
 			return io;
 		}
