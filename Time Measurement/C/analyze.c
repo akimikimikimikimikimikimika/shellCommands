@@ -2,8 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <stdio.h>
-
 enum AnalyzeKey { AKNull,AKStdout,AKStderr,AKResult };
 char** copyArray(char*[],int,int);
 

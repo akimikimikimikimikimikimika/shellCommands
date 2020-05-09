@@ -90,17 +90,11 @@ mod exec {
 
 		if d.multiple {
 
-			let mut cl:Vec<Command> = Vec::new();
-			cl.reserve(d.command.len());
+			let mut cl:Vec<Command> = d.command.iter().map(|c| {
+				make_cmd(S!("sh"),&vec![S!("-c"),S!(c)],&d)
+			}).collect();
 			let mut pl:Vec<PID> = Vec::new();
 			pl.reserve(d.command.len());
-			for c in d.command.iter() {
-				cl.push(make_cmd(
-					S!("sh"),
-					&vec![S!("-c"),S!(c)],
-					&d
-				));
-			}
 
 			let from_time = SystemTime::now();
 			for cmd in &mut cl {

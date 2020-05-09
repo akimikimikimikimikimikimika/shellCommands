@@ -25,7 +25,7 @@ build-g++:
 build-clang:
 	@make build -e cmd=clang ext=c std=c17 binFile=../bin/measure-c searchPath="C/*.c"
 build-gcc:
-	@make build -e cmd=gcc ext=c std=c17 binFile=../bin/measure-c searchPath="C/*.c"
+	@make build -e cmd="gcc -lm -lrt" ext=c std=c17 binFile=../bin/measure-c searchPath="C/*.c"
 build-swift:
 	@swiftc *.swift -o ../bin/measure-swift
 build-go:

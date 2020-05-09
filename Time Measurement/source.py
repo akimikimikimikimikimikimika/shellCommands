@@ -23,7 +23,7 @@ def argAnalyze():
 	noFlags=False
 	key=None
 	for a in l:
-		if noFlags: command.append(a)
+		if noFlags: command+=[a]
 		elif key!=None:
 			if key=="stdout": out=a
 			if key=="stderr": err=a
@@ -35,7 +35,7 @@ def argAnalyze():
 		elif a=="-m" or a=="-multiple": multiple=True
 		else:
 			noFlags=False
-			command.append(a)
+			command+=[a]
 	if len(command)==0: error("実行する内容が指定されていません")
 
 class execute:

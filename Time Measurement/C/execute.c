@@ -1,21 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <math.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
 #include "general.h"
+#include "time-switch.h"
 
 #define R 0
 #define W 1
-
-#ifdef CLOCK_MONOTONIC_RAW
-	#define CLOCKTYPE CLOCK_MONOTONIC_RAW
-#else
-	#define CLOCKTYPE CLOCK_MONOTONIC
-#endif
 
 struct status {
 	int pid;
@@ -24,11 +18,11 @@ struct status {
 struct status run(char*[],struct ChildOutput*,struct ChildOutput*);
 void checkFile(const char*);
 int fh(struct ResultOutput*);
-char* descTime(struct timespec*,struct timespec*);
+char* descTime(TIMETYPE,TIMETYPE);
 char* descEC(int);
 
 void execute(struct data *d) {
-	struct timespec st,en;
+	TIMETYPE st,en;
 	struct status s;
 
 	if (d->result.type==ROFile) checkFile(d->result.file);
@@ -42,7 +36,7 @@ void execute(struct data *d) {
 		args[1]="-c";
 		args[3]=NULL;
 
-		clock_gettime(CLOCKTYPE,&st);
+		GETTIME(st);
 		for (int n=0;n<d->count;n++) {
 			args[2]=d->command[n];
 			s=run(args,&d->out,&d->err);
@@ -50,10 +44,10 @@ void execute(struct data *d) {
 			pl[n]=s.pid;
 			if (ec!=0) break;
 		}
-		clock_gettime(CLOCKTYPE,&en);
+		GETTIME(en);
 
 		int r=fh(&d->result);
-		sprintf(rl,"time: %s\n",descTime(&st,&en));
+		sprintf(rl,"time: %s\n",descTime(st,en));
 		write(r,rl,strlen(rl));
 		for (int n=0;n<d->count;n++) {
 			char rl[50];
@@ -65,13 +59,13 @@ void execute(struct data *d) {
 		close(r);
 	}
 	else {
-		clock_gettime(CLOCKTYPE,&st);
+		GETTIME(st);
 		s=run(d->command,&d->out,&d->err);
-		clock_gettime(CLOCKTYPE,&en);
+		GETTIME(en);
 
 		ec=s.ec;
 		int r=fh(&d->result);
-		sprintf(rl,"time: %s\n",descTime(&st,&en));
+		sprintf(rl,"time: %s\n",descTime(st,en));
 		write(r,rl,strlen(rl));
 		sprintf(rl,"process id: %d\n",s.pid);
 		write(r,rl,strlen(rl));
@@ -141,9 +135,9 @@ int fh(struct ResultOutput *r) {
 	}
 }
 
-char* descTime(struct timespec *st,struct timespec *en) {
-	double sec=(double)(en->tv_sec-st->tv_sec);
-	double nsec=(double)(en->tv_nsec-st->tv_nsec);
+char* descTime(TIMETYPE st,TIMETYPE en) {
+	double sec=SEC(en)-SEC(st);
+	double nsec=NSEC(en)-NSEC(st);
 	if (nsec<0) { nsec+=1e+9; sec-=1; }
 	double r,v;
 	char t[50]; t[0]='\0';
