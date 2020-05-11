@@ -33,7 +33,7 @@ fn main() {
 
 fn arg_analyze(d:&mut Data) {
 	let mut l:Vec<String> = env::args().collect();
-	l.remove(0);
+	l=l[1..].to_vec();
 	if l.len()==0 { E!("引数が不足しています"); }
 	else {
 		match &l[0][..] {
@@ -42,11 +42,9 @@ fn arg_analyze(d:&mut Data) {
 			_ => {}
 		}
 	}
-	let mut no_flags:bool = false;
 	let mut key:Option<AnalyzeKey> = None;
-	d.command.reserve(l.len());
+	let mut n:usize=0;
 	for a in &l {
-		if no_flags { d.command.push(S!(a)); continue; }
 		if let Some(k)=key {
 			match k {
 				AnalyzeKey::Stdout => d.out=s2co(a),
@@ -62,13 +60,13 @@ fn arg_analyze(d:&mut Data) {
 			"-r"|"-result" => key=Some(AnalyzeKey::Result),
 			"-m"|"-multiple" => d.multiple=true,
 			_ => {
-				no_flags=true;
-				d.command.push(S!(a));
+				d.command=l[n..].to_vec();
+				break;
 			}
 		}
+		n+=1;
 	}
 	if d.command.len()==0 { E!("実行する内容が指定されていません"); }
-	d.command.shrink_to_fit();
 }
 
 mod exec {
@@ -90,11 +88,8 @@ mod exec {
 
 		if d.multiple {
 
-			let mut cl:Vec<Command> = d.command.iter().map(|c| {
-				make_cmd(S!("sh"),&vec![S!("-c"),S!(c)],&d)
-			}).collect();
-			let mut pl:Vec<PID> = Vec::new();
-			pl.reserve(d.command.len());
+			let mut cl:Vec<Command> = d.command.iter().map(|c| shell(c,&d)).collect();
+			let mut pl:Vec<PID> = Vec::with_capacity(d.command.len());
 
 			let from_time = SystemTime::now();
 			for cmd in &mut cl {
@@ -115,8 +110,7 @@ mod exec {
 		}
 		else {
 
-			let file = d.command.remove(0);
-			let mut cmd = make_cmd(file,&d.command,&d);
+			let mut cmd = make_cmd(&d.command[0],&d.command[1..],&d);
 
 			let from_time = SystemTime::now();
 			let (pid,ec_tmp) = run(&mut cmd);
@@ -138,7 +132,15 @@ mod exec {
 
 	}
 
-	fn make_cmd(file:String,args:&Vec<String>,d:&Data) -> Command {
+	fn shell(cmd:&String,d:&Data) -> Command {
+		let sh=match option_env!("SHELL") {
+			Some(s) => S!(s),
+			None => S!("sh")
+		};
+		return make_cmd(&sh,&[S!("-c"),S!(cmd)],&d);
+	}
+
+	fn make_cmd(file:&String,args:&[String],d:&Data) -> Command {
 		let mut cmd = Command::new(&file);
 		cmd.args(args.iter())
 			.stdin(Stdio::inherit())
@@ -234,7 +236,7 @@ mod docs {
 	pub fn version() {
 		output(S!(r#"
 
-			 measure v2.0
+			 measure v2.1
 			 Rust バージョン (measure-rs)
 
 		"#));

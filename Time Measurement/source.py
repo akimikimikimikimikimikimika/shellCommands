@@ -14,28 +14,31 @@ err="inherit"
 result="stderr"
 multiple=False
 
+def main():
+	argAnalyze()
+	execute()
+
 def argAnalyze():
-	global out,err,result,multiple
+	global command,out,err,result,multiple
 	l=sys.argv[1:]
 	if len(l)==0: error("引数が不足しています")
-	elif l[0]=="-h" or l[0]=="help" or l[0]=="-help" or l[0]=="--help": help()
-	elif l[0]=="-v" or l[0]=="version" or l[0]=="-version" or l[0]=="--version": version()
-	noFlags=False
+	elif eq(l[0],"-h","help","-help","--help"): help()
+	elif eq(l[0],"-v","version","-version","--version"): version()
 	key=None
-	for a in l:
-		if noFlags: command+=[a]
-		elif key!=None:
-			if key=="stdout": out=a
-			if key=="stderr": err=a
-			if key=="result": result=a
+	for n in range(0,len(l)):
+		a=l[n]
+		if key!=None:
+			if key==0: out=a
+			if key==1: err=a
+			if key==2: result=a
 			key=None
-		elif a=="-o" or a=="-our" or a=="-stdout": key="stdout"
-		elif a=="-e" or a=="-err" or a=="-stderr": key="stderr"
-		elif a=="-r" or a=="-result": key="result"
-		elif a=="-m" or a=="-multiple": multiple=True
+		elif eq(a,"-o","-our","-stdout"): key=0
+		elif eq(a,"-e","-err","-stderr"): key=1
+		elif eq(a,"-r","-result"): key=2
+		elif eq(a,"-m","-multiple"): multiple=True
 		else:
-			noFlags=False
-			command+=[a]
+			command=l[n:len(l)]
+			break
 	if len(command)==0: error("実行する内容が指定されていません")
 
 class execute:
@@ -44,31 +47,34 @@ class execute:
 		o=self.co2f(out)
 		e=self.co2f(err)
 		r=self.ro2f(result)
-		try:
-			if multiple:
-				pl=[]
-				ec=0
+		if multiple:
+			pl=[]
+			ec=0
+			try:
 				st=datetime.now()
 				for c in command:
 					pid,ec=self.run(c,o,e,True)
-					pl.append(pid)
+					pl+=[pid]
 					if ec!=0: break
 				en=datetime.now()
-				l=[]
-				l.append(f"time: {self.descTime(en-st)}")
-				for n in range(0,len(pl)): l.append(f"process{n+1} id: {pl[n]}")
-				l.extend([f"exit code: {ec}",""])
-				r.writelines(os.linesep.join(l))
-			else:
+			except: error("実行に失敗しました")
+			l=[]
+			l.append(f"time: {self.descTime(en-st)}")
+			for n in range(0,len(pl)): l.append(f"process{n+1} id: {pl[n]}")
+			l.extend([f"exit code: {ec}",""])
+			r.writelines(os.linesep.join(l))
+		else:
+			try:
 				st=datetime.now()
 				pid,ec=self.run(command,o,e,False)
 				en=datetime.now()
-				r.write(clean(f"""
-					time: {self.descTime(en-st)}
-					process id: {pid}
-					exit code: {ec}
-				""")+os.linesep)
-		except: error("実行に失敗しました")
+			except: error("実行に失敗しました")
+			r.write(clean(f"""
+				time: {self.descTime(en-st)}
+				process id: {pid}
+				exit code: {ec}
+			"""))
+		exit(ec)
 
 	def co2f(self,d):
 		if d=="inherit": return None
@@ -151,23 +157,26 @@ def help():
 
 		    などと1つ1つのコマンドを1つの文字列として渡して実行します
 
-	"""))
+	"""),end="")
 	exit(0)
 
 def version():
 	print(clean("""
 
-		 measure v2.0
+		 measure v2.1
 		 Python バージョン (measure-py)
 
-	"""))
+	"""),end="")
 	exit(0)
 
 def clean(text):
-	text=re.sub(r"\n\t+","\n",text)
+	text=re.sub(r"(?m)\t+","",text)
 	text=re.sub(r"^\n","",text)
-	text=re.sub(r"\n$","",text)
 	return text
 
-argAnalyze()
-execute()
+def eq(target,*cans):
+	for c in cans:
+		if c==target: return True
+	return False
+
+main()

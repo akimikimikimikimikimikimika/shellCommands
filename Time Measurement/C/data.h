@@ -25,7 +25,6 @@ struct data {
 	struct ChildOutput err;
 	struct ResultOutput result;
 	bool multiple;
-	char **command;
 	int count;
 };
 struct data initData();

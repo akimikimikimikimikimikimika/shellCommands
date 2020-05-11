@@ -1,11 +1,10 @@
 import java.util.*;
-import java.util.function.BiFunction;
 import java.io.*;
 import java.nio.file.*;
 
 public class Measure {
 
-	private static List<String> command=new ArrayList<String>();
+	private static String[] command=new String[0];
 	private static String out="inherit";
 	private static String err="inherit";
 	private static String result="stderr";
@@ -24,10 +23,9 @@ public class Measure {
 				case "-v": case "version": case "-version": case "--version": version();
 			}
 		}
-		boolean noFlags=false;
 		AnalyzeKey key=null;
+		int n=0;
 		for (String a:l) {
-			if (noFlags) { command.add(a); continue; }
 			if (key!=null) {
 				switch (key) {
 					case stdout: out=a; break;
@@ -37,17 +35,21 @@ public class Measure {
 				key=null;
 				continue;
 			}
+			Boolean body=false;
 			switch (a) {
 				case "-o": case "-out": case "-stdout": key=AnalyzeKey.stdout; break;
 				case "-e": case "-err": case "-stderr": key=AnalyzeKey.stderr; break;
 				case "-r": case "-result": key=AnalyzeKey.result; break;
 				case "-m": case "-multiple": multiple=true; break;
-				default:
-					noFlags=true;
-					command.add(a);
+				default: body=true;
 			}
+			if (body) {
+				command=Arrays.copyOfRange(l,n,l.length);
+				break;
+			}
+			n++;
 		}
-		if (command.size()==0) error("実行する内容が指定されていません");
+		if (command.length==0) error("実行する内容が指定されていません");
 	}
 	private enum AnalyzeKey { stdout, stderr, result };
 
@@ -58,42 +60,49 @@ public class Measure {
 		private ProcessBuilder.Redirect e;
 
 		execute() {
-			writeFile("");
+			showResult();
 			o=redirect(out);
 			e=redirect(err);
+			String[] res;
 			int ec=0;
 
 			if (multiple) {
-				List<Long> pl=new ArrayList<Long>();
-				List<ProcessBuilder> pbl=map(
-					command,(c,n)->makePB(Arrays.asList("sh","-c",c))
-				);
+				int l=command.length;
+				long[] pl=new long[l];
+				ProcessBuilder[] pbl=new ProcessBuilder[l];
+				int n=0;
+				for (String c:command) {pbl[n]=makePB("sh","-c",c);n++;}
 
-				long st=System.nanoTime();
+				long st=0;
+				long en=0;
 				try{
+					n=0;
+					st=System.nanoTime();
 					for (ProcessBuilder pb:pbl) {
 						Process p=pb.start();
-						pl.add(p.pid());
+						pl[n]=p.pid();
 						ec=p.waitFor();
 						if (ec!=0) break;
+						n++;
 					}
+					en=System.nanoTime();
 				}
 				catch(IOException e) { error("実行に失敗しました"); }
 				catch(InterruptedException e) { ec=-1; }
-				long en=System.nanoTime();
 
-				List<String> dl=map(
-					pl,(pid,n)->String.format("process%d id: %d",n+1,pid)
-				);
-				dl.add(0,String.format("time: %s",descTime(st,en)));
-				dl.add(String.format("%s",descEC(ec)));
-				showResult(dl);
+				res=new String[l+2];
+				res[0]=String.format("time: %s",descTime(en-st));
+				res[l+1]=descEC(ec);
+				n=0;
+				for (long pid:pl) {res[n+1]=String.format("process%d id: %d",n+1,pid);n++;}
 			}
 			else {
 				ProcessBuilder pb=makePB(command);
 				long pid=0;
 
-				long st=System.nanoTime();
+				long st;
+				long en;
+				st=System.nanoTime();
 				try{
 					Process p=pb.start();
 					pid=p.pid();
@@ -101,14 +110,16 @@ public class Measure {
 				}
 				catch(IOException e) { error("実行に失敗しました"); }
 				catch(InterruptedException e) { ec=-1; }
-				long en=System.nanoTime();
+				en=System.nanoTime();
 
-				showResult(Arrays.asList(
-					String.format("time: %s",descTime(st,en)),
+				res=new String[] {
+					String.format("time: %s",descTime(en-st)),
 					String.format("process id: %d",pid),
-					String.format("%s",descEC(ec))
-				));
+					descEC(ec)
+				};
 			}
+
+			showResult(res);
 			System.exit((ec+256)%256);
 		}
 
@@ -120,17 +131,17 @@ public class Measure {
 			}
 		}
 
-		private ProcessBuilder makePB(List<String> args) {
-			ProcessBuilder pb=new ProcessBuilder(args);
+		private ProcessBuilder makePB(String ...args) {
+			ProcessBuilder pb=new ProcessBuilder(Arrays.asList(args));
 			pb.redirectOutput(i);
 			pb.redirectOutput(o);
 			pb.redirectError(e);
 			return pb;
 		}
 
-		private String descTime(long st,long en) {
+		private String descTime(long nSec) {
 			String t="";
-			double r=(double)(en-st),v;
+			double r=(double)nSec,v;
 			r/=3600*1e+9;
 			v=Math.floor(r);
 			if (v>=1) t+=String.format("%.0fh ",v);
@@ -150,42 +161,30 @@ public class Measure {
 			else return String.format("exit code: %d",ec);
 		}
 
-		private <B,A> List<A> map(List<B> b,BiFunction<B,Integer,A> f) {
-			List<A> a=new ArrayList<A>();
-			for (int n=0;n<b.size();n++) a.add(f.apply(b.get(n),n));
-			return a;
-		}
-
-		private void showResult(List<String> lines) {
+		private void showResult(String ...l) {
+			String text=lines(l);
 			switch (result) {
-				case "stdout": for (String t:lines) System.out.println(t); break;
-				case "stderr": for (String t:lines) System.err.println(t); break;
+				case "stdout": if (!text.isEmpty()) System.out.println(text); break;
+				case "stderr": if (!text.isEmpty()) System.err.println(text); break;
 				default:
-					String res="";
-					for (String t:lines) res+=t+System.lineSeparator();
-					writeFile(res);
+					try{
+						Files.writeString(
+							Paths.get(result),
+							text,
+							StandardOpenOption.WRITE,
+							StandardOpenOption.CREATE,
+							StandardOpenOption.APPEND
+						);
+					}
+					catch(IOException e){ error("指定したパスには書き込みできません: "+result); }
 					break;
 			}
-		}
-
-		private void writeFile(String text) {
-			try{
-				if (result!="stdout" && result!="stderr")
-					Files.writeString(
-						Paths.get(result),
-						text,
-						StandardOpenOption.WRITE,
-						StandardOpenOption.CREATE,
-						StandardOpenOption.APPEND
-					);
-			}
-			catch(IOException e){ error("指定したパスには書き込みできません: "+result); }
 		}
 
 	}
 
 	private static void help() {
-		String[] text={
+		System.out.println(lines(
 			"",
 			" 使い方:",
 			"  measure [options] [command] [arg1] [arg2]…",
@@ -222,25 +221,24 @@ public class Measure {
 			"",
 			"    などと1つ1つのコマンドを1つの文字列として渡して実行します",
 			""
-		};
-		System.out.print(String.join(System.lineSeparator(),text));
+		));
 		System.exit(0);
 	}
 
 	private static void version() {
-		String[] text={
+		System.out.println(lines(
 			"",
-			" measure v2.0",
+			" measure v2.1",
 			" Java バージョン (measure-java)",
 			""
-		};
-		System.out.print(String.join(System.lineSeparator(),text));
+		));
 		System.exit(0);
-
 	}
 
+	private static String lines(String ...l) { return String.join(System.lineSeparator(),l); }
+
 	private static void error(String text) {
-		System.out.println(text);
+		System.err.println(text);
 		System.exit(1);
 	}
 

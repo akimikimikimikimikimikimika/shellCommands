@@ -24,26 +24,27 @@ function argAnalyze() {
 			case "-v": case "version": case "-version": case "--version": version();
 		}
 	}
-	var noFlags=false,key=null;
-	for (a of l) {
-		if (noFlags) {command.push(a);continue;}
+	var key=null;
+	for (var n=0;n<l.length;n++) {
+		let a=l[n];
 		if (key) {
 			switch (key) {
-				case "stdout": out=a; break;
-				case "stderr": err=a; break;
-				case "result": result=a; break;
+				case 0: out=a; break;
+				case 1: err=a; break;
+				case 2: result=a; break;
 			}
 			key=null;
 			continue;
 		}
+		breakable=false;
 		switch (a) {
-			case "-o": case "-out": case "-stdout": key="stdout"; break;
-			case "-e": case "-err": case "-stderr": key="stderr"; break;
-			case "-r": case "-result": key="result"; break;
+			case "-o": case "-out": case "-stdout": key=0; break;
+			case "-e": case "-err": case "-stderr": key=1; break;
+			case "-r": case "-result": key=2; break;
 			case "-m": case "-multiple": multiple=true; break;
 			default:
-				noFlags=true;
-				command.push(a);
+				command=l.slice(n);
+				breakable=true;
 		}
 	}
 	if (command.length==0) error("実行する内容が指定されていません");
@@ -58,19 +59,19 @@ let execute=(()=>{
 
 		var ec=0;
 		if (multiple) {
-			let pid=[];
+			let pl=[];
 
 			let st=performance.now();
 			for (c of command) {
 				let s=cp.spawnSync(c,{stdio:["inherit",o,e],shell:true});
-				pid.push(s.pid);
+				pl.push(s.pid);
 				ec=s.status;
 				if (ec!=0) break;
 			}
 			let en=performance.now();
 
 			fs.writeSync(r,"time: "+descTime(en-st)+os.EOL);
-			for (var n=0;n<pid.length;n++) fs.writeSync(r,`process${n+1} id:${pid[n]}`+os.EOL);
+			pl.forEach((pid,n)=>fs.writeSync(r,`process${n+1} id:${pid}`+os.EOL));
 			fs.writeSync(r,descEC(ec)+os.EOL);
 		}
 		else {
@@ -85,7 +86,7 @@ let execute=(()=>{
 				time: ${descTime(en-st)}
 				process id: ${pid}
 				${descEC(ec)}
-			`)+os.EOL);
+			`));
 		}
 		fs.closeSync(r);
 	}
@@ -187,7 +188,7 @@ function help() {
 function version() {
 	process.stdout.write(clean(`
 
-		 measure v2.0
+		 measure v2.1
 		 JavaScript バージョン (measure-js)
 
 	`));
@@ -195,7 +196,7 @@ function version() {
 }
 
 function clean(text) {
-	return text.replace(/\n\t+/g,"\n").replace(/^\n/,"").replace(/\n$/,"");
+	return text.replace(/\t+/mg,"").replace(/^\n/,"");
 }
 
 main();

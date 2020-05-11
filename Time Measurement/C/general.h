@@ -1,10 +1,9 @@
 #include "data.h"
 
 void argAnalyze(struct data*,int,char*[]);
-void execute(struct data*);
+void execute(struct data*,char**);
 void help();
 void version();
 
-char* copyStr(char*);
-bool eq(char *target,...);
+int eq(char *target,...);
 void error(const char*);

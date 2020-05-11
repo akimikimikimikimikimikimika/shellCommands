@@ -23,27 +23,29 @@ function argAnalyze() {
 			case "-v": case "version": case "-version": case "--version": version();
 		}
 	}
-	$noFlags=false;
 	$key=null;
-	foreach ($l as $a) {
-		if ($noFlags) {array_push($command,$a);continue;}
+	for ($n=0;$n<count($l);$n++) {
+		$a=$l[$n];
 		if ($key) {
 			switch ($key) {
-				case "stdout": $out=$a; break;
-				case "stderr": $err=$a; break;
-				case "result": $result=$a; break;
+				case 0: $out=$a; break;
+				case 1: $err=$a; break;
+				case 2: $result=$a; break;
 			}
 			$key=null;
 			continue;
 		}
+		$body=false;
 		switch ($a) {
-			case "-o": case "-out": case "-stdout": $key="stdout"; break;
-			case "-e": case "-err": case "-stderr": $key="stderr"; break;
-			case "-r": case "-result": $key="result"; break;
+			case "-o": case "-out": case "-stdout": $key=0; break;
+			case "-e": case "-err": case "-stderr": $key=1; break;
+			case "-r": case "-result": $key=2; break;
 			case "-m": case "-multiple": $multiple=true; break;
-			default:
-				$noFlags=true;
-				array_push($command,$a);
+			default: $body=true;
+		}
+		if ($body) {
+			$command=array_slice($l,$n);
+			break;
 		}
 	}
 	if (count($command)==0) error("実行する内容が指定されていません");
@@ -177,23 +179,22 @@ function help() {
 
 		    などと1つ1つのコマンドを1つの文字列として渡して実行します
 
-	Help);
+	Help.PHP_EOL);
 	exit;
 }
 
 function version() {
 	print clean(<<<"Version"
 
-		 measure v2.0
+		 measure v2.1
 		 PHP バージョン (measure-php)
 
-	Version);
+	Version.PHP_EOL);
 	exit;
 }
 
 function clean($text) {
-	$text=preg_replace("/\n\t+/","\n",$text);
-	$text=preg_replace("/^\t+/","",$text);
+	$text=preg_replace("/^\t+/m","",$text);
 	return $text;
 }
 

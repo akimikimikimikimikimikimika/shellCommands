@@ -1,4 +1,4 @@
-#! sh
+#! /bin/sh
 
 jarPath="../Time Measurement/measure-java.jar"
 

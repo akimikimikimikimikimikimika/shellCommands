@@ -31,8 +31,8 @@ build-swift:
 build-go:
 	@go build -o ../bin/measure-go *.go
 build-rust:
-	@rustc *.rs -o ../bin/measure-rs
+	@rustc *.rs -C opt-level=3 -o ../bin/measure-rs
 build-java:
-	@javac Measure.java
+	@javac Measure.java -Xlint:unchecked
 	@jar cfe measure-java.jar Measure *.class
 	@rm -f *.class

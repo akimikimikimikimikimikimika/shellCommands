@@ -18,13 +18,9 @@ func argAnalyze() {
 			default: break
 		}
 	}
-	var noFlags = false
+	var n=0
 	var key:AK? = nil
 	for a in l {
-		if noFlags {
-			command.append(a)
-			continue
-		}
 		if let k = key {
 			switch k {
 				case .stdout: out = CO.s2co(a)
@@ -34,15 +30,19 @@ func argAnalyze() {
 			key=nil
 			continue
 		}
+		var body=false
 		switch a {
 			case "-o","-out","-stdout": key = .stdout
 			case "-e","-err","-stderr": key = .stderr
 			case "-r","-result": key = .result
 			case "-m","-multiple": multiple = true
-			default:
-				noFlags=true
-				command.append(a)
+			default: body=true
 		}
+		if body {
+			command=Array(l[n...])
+			break
+		}
+		n+=1
 	}
 	if command.count==0 { exitWithError("実行する内容が指定されていません") }
 }
@@ -72,7 +72,7 @@ class execute {
 		};
 
 		if multiple {
-			let pl:[Process] = command.map { c in mp("/bin/sh",["-c",c]) }
+			let pl:[Process] = command.map { c in mp(shell(),["-c",c]) }
 			let st=Date()
 			for p in pl {
 				run(p,&ec)
@@ -100,6 +100,10 @@ class execute {
 		write(r,res)
 		exit(ec ?? 255)
 
+	}
+
+	private func shell() -> String {
+		return ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/sh"
 	}
 
 	private func run(_ p:Process,_ ec:inout Int32?) {
@@ -188,7 +192,7 @@ func help() {
 func version() {
 	write(FH.standardOutput,clean("""
 
-		 measure v2.0
+		 measure v2.1
 		 Swift バージョン (measure-swift)
 
 	"""))

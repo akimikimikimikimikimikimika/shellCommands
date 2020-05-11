@@ -7,35 +7,35 @@
 ```sh
 measure [options] someCommand arg1 arg2...
 ```
-この操作により, `someCommand` を実行し,その所要時間を表示します。<br>
-`arg1 arg2...` はそのままコマンドに引数として渡されます。<br>
-バージョン2より有効な `[options]` の指定により動作をカスタマイズできます。
+この操作により, `someCommand` を実行し,その所要時間を表示します。  
+`arg1 arg2...` はそのままコマンドに引数として渡されます。  
+`[options]` の指定により動作をカスタマイズできます。
 
 ### オプション
 
 - `-o`,`-out`,`-stdout`
-- `-e`,`-err`,`-stderr`<br>
-	標準出力,標準エラー出力の出力先を指定します<br>
+- `-e`,`-err`,`-stderr`  
+	標準出力,標準エラー出力の出力先を指定します  
 	指定しなければ `inherit` になります
-    * `inherit`<br>
+    * `inherit`  
 		stdoutはstdoutに,stderrはstderrにそれぞれ出力します
-    * `discard`<br>
+    * `discard`  
 		出力しません
-    * `[file path]`<br>
+    * `[file path]`  
 		指定したファイルに書き出します (追記)
 
-- `-r`,`-result`<br>
-	実行結果の出力先を指定します<br>
-	指定しなければ `stderr` になります<br>
+- `-r`,`-result`  
+	実行結果の出力先を指定します  
+	指定しなければ `stderr` になります  
 	- `stdout`,`stderr`
-	- `[file path]`<br>
+	- `[file path]`  
 		指定したファイルに書き出します (追記)
 
 
-- `-m`,`-multiple`<br>
-    複数のコマンドを実行します<br>
-	通常はシェル経由で実行されます<br>
-    例えば `measure echo 1` と指定していたのを<br>
+- `-m`,`-multiple`  
+    複数のコマンドを実行します  
+	通常はシェル経由で実行されます  
+    例えば `measure echo 1` と指定していたのを  
 	```sh
 	measure -multiple "echo 1" "echo 2"
 	```
@@ -54,17 +54,17 @@ measure [options] someCommand arg1 arg2...
 
 | コマンド | 言語 | バージョン |
 |:-:|:-:|:-:|
-| `measure` | C | 2.0 |
-| `measure-c` | C | 2.0 |
-| `measure-cpp` | C++ | 2.0 |
-| `measure-go` | Go | 2.0 |
-| `measure-swift` | Swift | 2.0 |
-| `measure-rs` | Rust | 2.0 |
-| `measure-js` | JavaScript | 2.0 |
-| `measure-py` | Python | 2.0 |
-| `measure-rb` | Ruby | 2.0 |
-| `measure-php` | PHP | 2.0 |
-| `measure-java` | Java | 2.0 |
+| `measure-c` | C | 2.1 |
+| `measure-cpp` | C++ | 2.1 |
+| `measure-go` | Go | 2.1 |
+| `measure-swift` | Swift | 2.1 |
+| `measure-rs` | Rust | 2.1 |
+| `measure-js` | JavaScript | 2.1 |
+| `measure-jl` | Julia | 2.1 |
+| `measure-py` | Python | 2.1 |
+| `measure-rb` | Ruby | 2.1 |
+| `measure-php` | PHP | 2.1 |
+| `measure-java` | Java | 2.1 |
 
 ### コンパイル
 

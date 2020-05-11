@@ -20,13 +20,9 @@ def argAnalyze
 			when "-v","version","-version","--version" then version()
 		end
 	end
-	noFlags=false
 	key=nil
-	l.each do |a|
-		if noFlags
-			$command.push a
-			next
-		end
+	l.length.times do |n|
+		a=l[n]
 		if key
 			case key
 				when :stdout then $out=a
@@ -42,8 +38,8 @@ def argAnalyze
 			when "-r","-result" then key=:result
 			when "-m","-multiple" then $multiple=true
 			else
-				noFlags=true
-				$command.push a
+				$command=l[n...l.length]
+				break
 		end
 	end
 	error "実行する内容が指定されていません" if $command.length==0
@@ -181,7 +177,7 @@ end
 def version
 	print clean <<-"Version"
 
-		 measure v2.0
+		 measure v2.1
 		 Ruby バージョン (measure-rb)
 
 	Version
@@ -189,7 +185,7 @@ def version
 end
 
 def clean(text)
-	text.gsub(/\n\t+/,"\n").sub(/^\t+/,"").sub(/\n\z/,"")
+	text.gsub(/^\t+/,"")
 end
 
 main

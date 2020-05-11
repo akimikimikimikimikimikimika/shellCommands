@@ -12,7 +12,7 @@ import (
 func main() {
 	var d = data()
 	argAnalyze(&d)
-	execute{}.main(&d)
+	execute{}.exec(&d)
 }
 
 func argAnalyze(d *Data) {
@@ -24,13 +24,8 @@ func argAnalyze(d *Data) {
 			default:
 		}
 	}
-	var noFlags = false
 	var key AnalyzeKey = AKNone
-	for _,a := range l {
-		if noFlags {
-			d.command=append(d.command,a)
-			continue
-		}
+	for n,a := range l {
 		if key!=AKNone {
 			switch key {
 				case AKOut: d.out=a
@@ -40,36 +35,33 @@ func argAnalyze(d *Data) {
 			key=AKNone
 			continue
 		}
+		body:=false
 		switch a {
 			case "-o","-out","-stdout": key=AKOut
 			case "-e","-err","-stderr": key=AKErr
 			case "-r","-result": key=AKResult
 			case "-m","-multiple": d.multiple=true
-			default:
-				noFlags=true
-				d.command=append(d.command,a)
+			default: body=true
+		}
+		if body {
+			d.command=l[n:]
+			break
 		}
 	}
 	if len(d.command)==0 { error("実行する内容が指定されていません") }
 }
 
-type execute struct{};
-func (x execute) main(d *Data) {
-	i,o,e,r:=os.Stdin,d.out2f(),d.err2f(),d.result2f()
+type execute struct{
+	data *Data
+};
+func (x execute) exec(d *Data) {
+	x.data=d
+	r:=d.result2f()
 	ec:=0
-	makeCmd:=func(args []string) *exec.Cmd {
-		var cmd *exec.Cmd
-		if len(args)==1 { cmd=exec.Command(args[0]) } else
-		{ cmd=exec.Command(args[0],args[1:]...) }
-		cmd.Stdin=i
-		if o!=nil { cmd.Stdout=o }
-		if e!=nil { cmd.Stderr=e }
-		return cmd
-	}
 	if d.multiple {
 		cl:=[]*exec.Cmd{}
 		pl:=[]int{}
-		for _,c:=range d.command { cl=append(cl,makeCmd([]string{"sh","-c",c})) }
+		for _,c:=range d.command { cl=append(cl,x.makeCmd(x.shell(c))) }
 
 		var pid int
 		st:=time.Now()
@@ -83,18 +75,34 @@ func (x execute) main(d *Data) {
 		for n,p:=range pl { fmt.Fprintln(r,fmt.Sprintf("process%d id: %d",n+1,p)) }
 		fmt.Fprintln(r,x.descEC(ec))
 	} else {
-		cmd:=makeCmd(d.command)
+		cmd:=x.makeCmd(d.command)
 		var pid int
 		st:=time.Now()
 		pid,ec=x.run(cmd)
 		en:=time.Now()
-		fmt.Fprintln(r,clean(fmt.Sprint(`
+		fmt.Fprint(r,clean(fmt.Sprint(`
 			time: `,x.descTime(st,en),`
 			process id: `,pid,`
 			`,x.descEC(ec),`
 		`)))
 	}
 	if ec==-1 { os.Exit(255) } else { os.Exit(ec) }
+}
+func (x execute) shell(cmd string) []string{
+	sh,has:=os.LookupEnv("SHELL")
+	if !has {sh="sh"}
+	return []string{sh,"-c",cmd}
+}
+func (x execute) makeCmd(args []string) *exec.Cmd {
+	var cmd *exec.Cmd
+	if len(args)==1 { cmd=exec.Command(args[0]) } else
+	{ cmd=exec.Command(args[0],args[1:]...) }
+	cmd.Stdin=os.Stdin
+	o:=x.data.out2f()
+	e:=x.data.err2f()
+	if o!=nil { cmd.Stdout=o }
+	if e!=nil { cmd.Stderr=e }
+	return cmd
 }
 func (x execute) run(c *exec.Cmd) (int,int) {
 	e := c.Run()
@@ -180,12 +188,10 @@ func error(text string) {
 }
 
 func clean(text string) string {
-	r1,_:=regexp.Compile(`\n\t+`)
+	r1,_:=regexp.Compile(`(?m)^\t+`)
 	r2,_:=regexp.Compile(`^\n`)
-	r3,_:=regexp.Compile(`\n$`)
-	text=r1.ReplaceAllString(text,"\n")
+	text=r1.ReplaceAllString(text,"")
 	text=r2.ReplaceAllString(text,"")
-	text=r3.ReplaceAllString(text,"")
 	return text
 }
 
