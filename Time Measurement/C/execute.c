@@ -158,7 +158,7 @@ void descTime(int fd,TIMETYPE st,TIMETYPE en) {
 	DESC(fd,"%.3lfms\n",nsec/1e+6);
 }
 void descEC(int fd,int ec) {
-	char t[24];
+	char t[25];
 	if (ec<0) strcpy(t,"terminated due to signal");
 	else sprintf(t,"exit code: %d",ec);
 	write(fd,t,strlen(t));
