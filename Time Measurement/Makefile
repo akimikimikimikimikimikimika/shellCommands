@@ -36,3 +36,5 @@ build-java:
 	@javac Measure.java -Xlint:unchecked
 	@jar cfe measure-java.jar Measure *.class
 	@rm -f *.class
+build-cs:
+	@mcs source.cs -out:measure-cs.exe

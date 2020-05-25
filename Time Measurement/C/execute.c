@@ -31,11 +31,9 @@ void execute(struct data *d,char** command) {
 	int ec;
 	if (d->multiple) {
 		int pl[d->count];
-		char *args[4];
 		char* sh=getenv("SHELL");
-		args[0]=sh==NULL ? "sh" : sh;
-		args[1]="-c";
-		args[3]=NULL;
+		char* args[]={sh==NULL?"sh":sh,"-c",NULL,NULL};
+		for (int n=0;n<d->count;n++) pl[n]=-1;
 
 		GETTIME(st);
 		for (int n=0;n<d->count;n++) {
@@ -52,7 +50,8 @@ void execute(struct data *d,char** command) {
 			descTime(r,st,en);
 			for (int n=0;n<d->count;n++) {
 				char t[20];
-				sprintf(t,"process%d id: %d\n",n+1,pl[n]);
+				if (pl[n]<0) sprintf(t,"process%d id: N/A\n",n+1);
+				else sprintf(t,"process%d id: %d\n",n+1,pl[n]);
 				write(r,t,strlen(t));
 			}
 			descEC(r,ec);
@@ -155,7 +154,7 @@ void descTime(int fd,TIMETYPE st,TIMETYPE en) {
 	if (v>=1) DESC(fd,"%.0lfm ",v);
 	r=(r-v)*60; v=floor(r);
 	if (v>=1) DESC(fd,"%.0lfs ",v);
-	DESC(fd,"%.3lfms\n",nsec/1e+6);
+	DESC(fd,"%07.3lfms\n",nsec/1e+6);
 }
 void descEC(int fd,int ec) {
 	char t[25];

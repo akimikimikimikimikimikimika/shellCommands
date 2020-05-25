@@ -61,16 +61,18 @@ class execute {
 
 		$ec=0;
 		if ($multiple) {
-			$pl=[];
+			$pl=array_fill(0,count($command),-1);
+			$n=0;
 			$st=hrtime(true);
 			foreach ($command as $c) {
 				$this->run($c,$o,$e,$pid,$ec);
-				array_push($pl,$pid);
+				$pl[$n]=$pid;
 				if ($ec!=0) break;
+				$n++;
 			}
 			$en=hrtime(true);
 			fwrite($r,"time: ".$this->descTime($en-$st).PHP_EOL);
-			for ($n=0;$n<count($pl);$n++) fwrite($r,"process".($n+1)." id: ".$pl[$n].PHP_EOL);
+			for ($n=0;$n<count($pl);$n++) fwrite($r,"process".($n+1)." id: ".($pl[$n]<0 ? "N/A" : $pl[$n]).PHP_EOL);
 			fwrite($r,"exit code: $ec".PHP_EOL);
 		}
 		else {
@@ -130,7 +132,7 @@ class execute {
 		$r=($r-$v)*60;$v=floor($r);
 		if ($v>=1) $t.="${v}s ";
 		$r=($r-$v)*1000;
-		$t.=sprintf("%.3fms",$r);
+		$t.=sprintf("%07.3fms",$r);
 		return $t;
 	}
 
@@ -186,7 +188,7 @@ function help() {
 function version() {
 	print clean(<<<"Version"
 
-		 measure v2.1
+		 measure v2.2
 		 PHP バージョン (measure-php)
 
 	Version.PHP_EOL);

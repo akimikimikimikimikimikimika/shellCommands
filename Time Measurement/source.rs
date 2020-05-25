@@ -89,13 +89,15 @@ mod exec {
 		if d.multiple {
 
 			let mut cl:Vec<Command> = d.command.iter().map(|c| shell(c,&d)).collect();
-			let mut pl:Vec<PID> = Vec::with_capacity(d.command.len());
+			let mut pl:Vec<PID> = d.command.iter().map(|_c| 0).collect();
 
 			let from_time = SystemTime::now();
+			let mut n = 0;
 			for cmd in &mut cl {
 				let (pid,ec_tmp) = run(cmd);
-				pl.push(pid);
+				pl[n]=pid;
 				ec=ec_tmp;
+				n+=1;
 				if let Some(0) = ec { continue; } else { break; }
 			}
 			let to_time = SystemTime::now();
@@ -103,7 +105,10 @@ mod exec {
 			add!(t,"time: {}\n",desc_time(from_time,to_time));
 			for n in 0..pl.len() {
 				add!(t,"process{} ",n+1);
-				add!(t,"id: {}\n",pl[n]);
+				let pid:String;
+				if pl[n]==0 { pid=S!("N/A"); }
+				else { pid=pl[n].to_string(); }
+				add!(t,"id: {}\n",pid);
 			}
 			add!(t,"{}\n",desc_ec(ec));
 
@@ -170,7 +175,7 @@ mod exec {
 		v=r.floor();
 		if v>=1.0 { add!(t,"{:.0}s ",v); }
 		r=(r-v)*1000.0;
-		add!(t,"{:.3}ms",r);
+		add!(t,"{:07.3}ms",r);
 
 		return t;
 	}
@@ -236,7 +241,7 @@ mod docs {
 	pub fn version() {
 		output(S!(r#"
 
-			 measure v2.1
+			 measure v2.2
 			 Rust バージョン (measure-rs)
 
 		"#));

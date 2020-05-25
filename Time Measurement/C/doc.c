@@ -50,7 +50,7 @@ void help() {
 void version() {
 	output(
 		"",
-		" measure v2.1",
+		" measure v2.2",
 		" C バージョン (measure-c)",
 		"",
 		NULL

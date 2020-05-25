@@ -28,6 +28,8 @@ measure-rs:
 	@cd Time\ Measurement && make build-rust
 measure-java:
 	@cd Time\ Measurement && make build-java
+measure-cs:
+	@cd Time\ Measurement && make build-cs
 
 random-cpp:
 	@cd Random && make build-${cpp}

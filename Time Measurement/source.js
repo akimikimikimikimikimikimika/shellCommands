@@ -36,7 +36,7 @@ function argAnalyze() {
 			key=null;
 			continue;
 		}
-		breakable=false;
+		var body=false;
 		switch (a) {
 			case "-o": case "-out": case "-stdout": key=0; break;
 			case "-e": case "-err": case "-stderr": key=1; break;
@@ -44,8 +44,9 @@ function argAnalyze() {
 			case "-m": case "-multiple": multiple=true; break;
 			default:
 				command=l.slice(n);
-				breakable=true;
+				body=true;
 		}
+		if (body) break;
 	}
 	if (command.length==0) error("実行する内容が指定されていません");
 }
@@ -59,19 +60,22 @@ let execute=(()=>{
 
 		var ec=0;
 		if (multiple) {
-			let pl=[];
+			let pl=new Array(command.length);
+			pl.fill(-1);
+			var n=0;
 
 			let st=performance.now();
 			for (c of command) {
 				let s=cp.spawnSync(c,{stdio:["inherit",o,e],shell:true});
-				pl.push(s.pid);
+				pl[n]=s.pid;
 				ec=s.status;
 				if (ec!=0) break;
+				n++;
 			}
 			let en=performance.now();
 
 			fs.writeSync(r,"time: "+descTime(en-st)+os.EOL);
-			pl.forEach((pid,n)=>fs.writeSync(r,`process${n+1} id:${pid}`+os.EOL));
+			pl.forEach((pid,n)=>fs.writeSync(r,`process${n+1} id: ${pid<0?"N/A":pid}`+os.EOL));
 			fs.writeSync(r,descEC(ec)+os.EOL);
 		}
 		else {
@@ -127,7 +131,8 @@ let execute=(()=>{
 		r=(r-v)*60,v=Math.floor(r);
 		if (v>=1) t+=`${v}s `;
 		r=(r-v)*1000;
-		t+=`${r.toFixed(3)}ms`;
+		let ms=r.toFixed(3);
+		t+=`${"0".repeat(7-ms.length)}${ms}ms`;
 		return t;
 	}
 
@@ -188,7 +193,7 @@ function help() {
 function version() {
 	process.stdout.write(clean(`
 
-		 measure v2.1
+		 measure v2.2
 		 JavaScript バージョン (measure-js)
 
 	`));

@@ -54,16 +54,18 @@ class Execute
 		r=ro2f $result
 		ec=0
 		if $multiple
-			pl=[]
+			pl=[-1]*$command.length
+			n=0
 			st=Time.now
 			$command.each do |c|
 				pid,ec=run(c,o,e)
-				pl.push pid
+				pl[n]=pid
 				break if ec!=0
+				n+=1
 			end
 			en=Time.now
 			r.puts "time: "+(descTime en-st)
-			pl.length.times { |n| r.puts "process#{n+1} id: "+pl[n].to_s }
+			pl.length.times { |n| r.puts "process#{n+1} id: "+ (pl[n]<0 ? "N/A" : pl[n].to_s) }
 			r.puts "exit code: "+ec.to_s
 		else
 			st=Time.now
@@ -119,7 +121,7 @@ class Execute
 		r=(r-v)*60;v=r.floor
 		t+="#{v}s " if v>=1
 		r=(r-v)*1000
-		t+="#{sprintf("%.3f",r)}ms"
+		t+="#{sprintf("%07.3f",r)}ms"
 		t
 	end
 
@@ -177,7 +179,7 @@ end
 def version
 	print clean <<-"Version"
 
-		 measure v2.1
+		 measure v2.2
 		 Ruby バージョン (measure-rb)
 
 	Version

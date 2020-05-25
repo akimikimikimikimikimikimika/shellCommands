@@ -1,0 +1,30 @@
+#! /bin/sh
+
+jarPath="../Time Measurement/measure-cs.exe"
+
+notFoundError() {
+	echo "実行ファイルが見つかりません" >&2
+	exit 1
+}
+
+bs=\\
+parse() {
+	local x="$(echo $1 | sed -Ee "s/$bs$bs/$bs$bs$bs$bs/g" | sed -Ee "s/$bs\"/$bs$bs\"/g" | sed -Ee "s/$bs'/$bs$bs'/g" | sed -Ee "s/$bs /$bs$bs /g")"
+	echo "$x"
+}
+
+path="$(dirname "$0")/$(dirname "$jarPath")"
+if [ ! -d "$path" ]; then
+	notFoundError
+fi
+path="$(cd "$path"; pwd)/$(basename "$jarPath")"
+if [ ! -f "$path" ]; then
+	notFoundError
+fi
+
+args="mono `parse "$path"`"
+for x in "$@" ; do
+	args="$args `parse "$x"`"
+done
+
+exec sh -c "$args"

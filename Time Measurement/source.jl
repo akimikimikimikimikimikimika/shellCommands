@@ -63,7 +63,7 @@ end
 function version()
 	print(clean("""
 
-		 measure v2.1
+		 measure v2.2
 		 Julia バージョン (measure-jl)
 
 	"""))
@@ -120,7 +120,7 @@ module execute
 		ec=0
 		sec=0
 		if multiple
-			pl=[]
+			pl=fill(-1,length(command))
 			cl=map(function(s)
 				cmd=nothing
 				if occursin(r"#\{\}\(\)\[\]<>\|\&\*\?~;",s)
@@ -141,9 +141,9 @@ module execute
 			end,command)
 			try
 				sec=@elapsed begin
-					for c in cl
-						p=run(c,wait=false)
-						append!(pl,[getpid(p)])
+					for n in 1:length(cl)
+						p=run(cl[n],wait=false)
+						pl[n]=getpid(p)
 						wait(p)
 						ec=p.exitcode
 						if ec!=0 break end
@@ -154,7 +154,7 @@ module execute
 			end
 			println(r,"time: $(descTime(sec))")
 			for n in 1:length(pl)
-				println(r,"process$n id: $(pl[n])")
+				println(r,"process$n id: $(pl[n]<0 ? "N/A" : pl[n])")
 			end
 			println(r,"exit code: $(ec)")
 		else
@@ -223,7 +223,7 @@ module execute
 		v=floor(r)
 		if v>=1 t*=@sprintf("%.0fs ",v) end
 		r=(r-v)*1000
-		t*=@sprintf("%.3fms",r)
+		t*=@sprintf("%07.3fms",r)
 		return t
 	end
 

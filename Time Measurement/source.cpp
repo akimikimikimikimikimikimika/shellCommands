@@ -28,8 +28,8 @@ class execute {
 	public: execute();
 	private:
 		int ec=0;
-		VS shell();
-		int run(vector<string>);
+		char** shell();
+		int run(char**);
 		void connect(string,int);
 		ofstream fh();
 		string descTime(nanoseconds dur);
@@ -55,7 +55,7 @@ void clear(char**);
 
 int main(int argc,char *argv[]) {
 	if (argc==1) error("引数が不足しています");
-	vector<string> args(argv+1,argv+argc);
+	VS args(argv+1,argv+argc);
 	argAnalyze(args);
 	execute();
 	return 0;
@@ -98,34 +98,45 @@ execute::execute() {
 	stringstream res;
 	TP st;TP en;
 	if (!eq(result,"stdout","stderr")) fh().close();
+
 	if (multiple) {
-		vector<int> pl;
-		pl.reserve(command.size());
-		VS args=shell();
+		int l=command.size();
+		vector<int> pl(l,-1);
+		char** cmd=vs2ca(command);
+		char** args=shell();
+		int n;
 		st=HRC::now();
-		for (string c:command) {
-			args[2]=c;
-			pl.push_back(run(args));
+		for (n=0;cmd[n]!=nullptr;n++) {
+			args[2]=cmd[n];
+			pl[n]=run(args);
 			if (ec!=0) break;
 		}
 		en=HRC::now();
+		args[2]=nullptr;
+		clear(args);
 		res << "time: " << descTime(en-st) << endl;
-		int n=1;
+		n=1;
 		for (int pid:pl) {
-			res << "process" << n << " id: " << pid << endl;
+			res << "process" << n << " id: ";
+			if (pid<0) res << "N/A";
+			else res << pid;
+			res << endl;
 			n++;
 		}
 		res << descEC() << endl;
 	}
 	else {
+		char** args=vs2ca(command);
 		st=HRC::now();
-		int pid=run(command);
+		int pid=run(args);
 		en=HRC::now();
+		clear(args);
 		res <<
 		"time: " << descTime(en-st) << endl <<
 		"process id: " << pid << endl <<
 		descEC() << endl;
 	}
+
 	if (ec!=255) {
 		if (result=="stdout") cout << res.str();
 		else if (result=="stderr") cerr << res.str();
@@ -138,23 +149,20 @@ execute::execute() {
 	}
 	else exit(1);
 }
-VS execute::shell() {
+char** execute::shell() {
+	VS args={"sh","-c",""};
 	char* sh=getenv("SHELL");
-	if (sh==nullptr) return {"sh","-c",""};
-	else return {sh,"-c",""};
+	if (sh!=nullptr) args[0]=sh;
+	return vs2ca(args);
 }
-int execute::run(VS args) {
+int execute::run(char** args) {
 	int sv;
-	char** ca=vs2ca(args);
 	int pid=fork();
-	if (pid<0) {
-		clear(ca);
-		error("プロセスの起動に失敗しました");
-	}
+	if (pid<0) error("プロセスの起動に失敗しました");
 	if (pid==0) {
 		connect(out,STDOUT_FILENO);
 		connect(err,STDERR_FILENO);
-		if (execvp(args[0].c_str(),ca)<0) {
+		if (execvp(args[0],args)<0) {
 			cerr << "プロセスの実行に失敗しました" << endl;
 			exit(255);
 		}
@@ -162,7 +170,6 @@ int execute::run(VS args) {
 	waitpid(pid,&sv,0);
 	if (WIFEXITED(sv)) ec=WEXITSTATUS(sv);
 	else ec=-1;
-	clear(ca);
 	return pid;
 }
 void execute::connect(string co,int sfd) {
@@ -196,7 +203,8 @@ string execute::descTime(nanoseconds dur) {
 	if (h>=1) ss << h << "h ";
 	if (m>=1) ss << m << "m ";
 	if (s>=1) ss << s << "s ";
-	ss << fixed << setprecision(3) << (double)ns/1e+6 << "ms";
+	ss.fill('0');
+	ss << fixed << setw(7) << setprecision(3) << (double)ns/1e+6 << "ms";
 	return ss.str();
 }
 string execute::descEC() {
@@ -254,7 +262,7 @@ void help() {
 void version() {
 	output({
 		"",
-		" measure v2.1",
+		" measure v2.2",
 		" C++ バージョン (measure-cpp)",
 		""
 	});

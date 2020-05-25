@@ -48,19 +48,21 @@ class execute:
 		e=self.co2f(err)
 		r=self.ro2f(result)
 		if multiple:
-			pl=[]
+			pl=[-1]*len(command)
 			ec=0
 			try:
+				n=0
 				st=datetime.now()
 				for c in command:
 					pid,ec=self.run(c,o,e,True)
-					pl+=[pid]
+					pl[n]=pid
 					if ec!=0: break
+					n+=1
 				en=datetime.now()
 			except: error("実行に失敗しました")
 			l=[]
 			l.append(f"time: {self.descTime(en-st)}")
-			for n in range(0,len(pl)): l.append(f"process{n+1} id: {pl[n]}")
+			for n in range(0,len(pl)): l.append(f"process{n+1} id: {pl[n] if pl[n]>=0 else 'N/A'}")
 			l.extend([f"exit code: {ec}",""])
 			r.writelines(os.linesep.join(l))
 		else:
@@ -112,7 +114,7 @@ class execute:
 		r=(r-v)*60
 		v=floor(r)
 		if v>=1: t+="{:.0f}s ".format(v)
-		t+="{:.3f}ms".format(td.microseconds/1e+3)
+		t+="{:07.3f}ms".format(td.microseconds/1e+3)
 		return t
 
 def error(text):
@@ -163,7 +165,7 @@ def help():
 def version():
 	print(clean("""
 
-		 measure v2.1
+		 measure v2.2
 		 Python バージョン (measure-py)
 
 	"""),end="")

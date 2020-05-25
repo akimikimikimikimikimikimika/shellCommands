@@ -17,11 +17,9 @@ public class Measure {
 
 	private static void argAnalyze(String[] l) {
 		if (l.length==0) error("引数が不足しています");
-		else {
-			switch (l[0]) {
-				case "-h": case "help": case "-help": case "--help": help();
-				case "-v": case "version": case "-version": case "--version": version();
-			}
+		else switch (l[0]) {
+			case "-h": case "help": case "-help": case "--help": help();
+			case "-v": case "version": case "-version": case "--version": version();
 		}
 		AnalyzeKey key=null;
 		int n=0;
@@ -69,6 +67,7 @@ public class Measure {
 			if (multiple) {
 				int l=command.length;
 				long[] pl=new long[l];
+				Arrays.fill(pl,-1);
 				ProcessBuilder[] pbl=new ProcessBuilder[l];
 				int n=0;
 				for (String c:command) {pbl[n]=makePB("sh","-c",c);n++;}
@@ -94,7 +93,7 @@ public class Measure {
 				res[0]=String.format("time: %s",descTime(en-st));
 				res[l+1]=descEC(ec);
 				n=0;
-				for (long pid:pl) {res[n+1]=String.format("process%d id: %d",n+1,pid);n++;}
+				for (long pid:pl) {res[n+1]=String.format("process%d id: %s",n+1,pid<0?"N/A":pid);n++;}
 			}
 			else {
 				ProcessBuilder pb=makePB(command);
@@ -152,7 +151,7 @@ public class Measure {
 			v=Math.floor(r);
 			if (v>=1) t+=String.format("%.0fs ",v);
 			r=(r-v)*1000;
-			t+=String.format("%.3fms",r);
+			t+=String.format("%07.3fms",r);
 			return t;
 		}
 
@@ -228,7 +227,7 @@ public class Measure {
 	private static void version() {
 		System.out.println(lines(
 			"",
-			" measure v2.1",
+			" measure v2.2",
 			" Java バージョン (measure-java)",
 			""
 		));

@@ -81,7 +81,8 @@ class execute {
 			let en=Date()
 			res+="time: \(descTime(st:st,en:en))\n"
 			for n in 0..<pl.count {
-				res+="process\(n+1) id: \(pl[n].processIdentifier)\n"
+				let pid=pl[n].processIdentifier
+				res+="process\(n+1) id: \(pid==0 ? "N/A" : pid.description)\n"
 			}
 			res+="\(descEC(ec))\n"
 		}
@@ -137,7 +138,7 @@ class execute {
 		if v>=1 { t+=d2s("%.0fs ",v) }
 		// milliseconds
 		r=(r-v)*1000
-		t+=d2s("%.3fms",r)
+		t+=d2s("%07.3fms",r)
 		return t
 	}
 
@@ -192,7 +193,7 @@ func help() {
 func version() {
 	write(FH.standardOutput,clean("""
 
-		 measure v2.1
+		 measure v2.2
 		 Swift バージョン (measure-swift)
 
 	"""))

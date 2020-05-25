@@ -59,20 +59,28 @@ func (x execute) exec(d *Data) {
 	r:=d.result2f()
 	ec:=0
 	if d.multiple {
-		cl:=[]*exec.Cmd{}
-		pl:=[]int{}
-		for _,c:=range d.command { cl=append(cl,x.makeCmd(x.shell(c))) }
+		l:=len(d.command)
+		cl:=make([]*exec.Cmd,l)
+		pl:=make([]int,l)
+		for n,c:=range d.command {
+			pl[n]=-1
+			cl[n]=x.makeCmd(x.shell(c))
+		}
 
 		var pid int
 		st:=time.Now()
-		for _,c:=range cl {
+		for n,c:=range cl {
 			pid,ec=x.run(c)
-			pl=append(pl,pid)
+			pl[n]=pid
 			if ec!=0 { break }
 		}
 		en:=time.Now()
 		fmt.Fprintln(r,fmt.Sprintf("time: %s",x.descTime(st,en)))
-		for n,p:=range pl { fmt.Fprintln(r,fmt.Sprintf("process%d id: %d",n+1,p)) }
+		for n,p:=range pl {
+			pid:=fmt.Sprintf("%d",p)
+			if p<0 { pid="N/A" }
+			fmt.Fprintln(r,fmt.Sprintf("process%d id: %s",n+1,pid))
+		}
 		fmt.Fprintln(r,x.descEC(ec))
 	} else {
 		cmd:=x.makeCmd(d.command)
@@ -105,9 +113,9 @@ func (x execute) makeCmd(args []string) *exec.Cmd {
 	return cmd
 }
 func (x execute) run(c *exec.Cmd) (int,int) {
-	e := c.Run()
-	if e != nil { error("実行に失敗しました") }
-	s := c.ProcessState
+	c.Run()
+	s:=c.ProcessState
+	if s==nil { error("実行に失敗しました") }
 	return s.Pid(),s.ExitCode()
 }
 func (x execute) descTime(st time.Time,en time.Time) string {
@@ -122,7 +130,7 @@ func (x execute) descTime(st time.Time,en time.Time) string {
 	v=math.Floor(r)
 	if v>=1 { t+=fmt.Sprintf("%.0fs ",v) }
 	r=(r-v)*1000
-	t+=fmt.Sprintf("%.3fms",r)
+	t+=fmt.Sprintf("%07.3fms",r)
 	return t
 }
 func (x execute) descEC(ec int) string {
@@ -175,7 +183,7 @@ func help() {
 func version() {
 	fmt.Fprint(os.Stdout,clean(`
 
-		 measure v2.0
+		 measure v2.2
 		 Go バージョン (measure-go)
 
 	`))
