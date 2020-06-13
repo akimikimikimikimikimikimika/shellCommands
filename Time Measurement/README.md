@@ -56,16 +56,16 @@ measure [options] someCommand arg1 arg2...
 |:-:|:-:|:-:|
 | `measure-c` | C | 2.2 |
 | `measure-cpp` | C++ | 2.2 |
-| `measure-cs` | C# | 2.2 |
+| `measure-rs` | Rust | 2.2 |
 | `measure-go` | Go | 2.2 |
 | `measure-swift` | Swift | 2.2 |
-| `measure-rs` | Rust | 2.2 |
-| `measure-js` | JavaScript | 2.2 |
-| `measure-jl` | Julia | 2.2 |
+| `measure-php` | PHP | 2.2 |
 | `measure-py` | Python | 2.2 |
 | `measure-rb` | Ruby | 2.2 |
-| `measure-php` | PHP | 2.2 |
+| `measure-cs` | C# | 2.2 |
+| `measure-js` | JavaScript | 2.2 |
 | `measure-java` | Java | 2.2 |
+| `measure-jl` | Julia | 2.2 |
 
 ### コンパイル
 
