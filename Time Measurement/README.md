@@ -13,18 +13,18 @@ measure [options] someCommand arg1 arg2...
 
 ### オプション
 
-- `-o`,`-out`,`-stdout`
-- `-e`,`-err`,`-stderr`  
+- `-o`,`-out`,`-stdout` `[string]`
+- `-e`,`-err`,`-stderr` `[string]`  
 	標準出力,標準エラー出力の出力先を指定します  
 	指定しなければ `inherit` になります
-    * `inherit`  
+	* `inherit`  
 		stdoutはstdoutに,stderrはstderrにそれぞれ出力します
-    * `discard`  
+	* `discard`  
 		出力しません
-    * `[file path]`  
+	* `[file path]`  
 		指定したファイルに書き出します (追記)
 
-- `-r`,`-result`  
+- `-r`,`-result` `[string]`  
 	実行結果の出力先を指定します  
 	指定しなければ `stderr` になります  
 	- `stdout`,`stderr`
@@ -33,13 +33,22 @@ measure [options] someCommand arg1 arg2...
 
 
 - `-m`,`-multiple`  
-    複数のコマンドを実行します  
+	複数のコマンドを実行します  
 	通常はシェル経由で実行されます  
-    例えば `measure echo 1` と指定していたのを  
+	例えば `measure echo 1` と指定していたのを  
 	```sh
 	measure -multiple "echo 1" "echo 2"
 	```
-    などと1つ1つのコマンドを1つの文字列として渡して実行します
+	などと1つ1つのコマンドを1つの文字列として渡して実行します
+	引数に次のいずれかの値を指定することができます (指定しなければserial)
+	* `none`  
+		単一のコマンドとして実行します (-mを指定しない場合と同じ)
+	* `serial`  
+		指定した複数のコマンドをその順に実行していきます
+	* `parallel`  
+		並列実行します
+
+	`-m` オプションに関してはコマンドによって多少差異があるので,詳しくは `measure help` を確認してください。
 
 ### 計測可能域
 
@@ -47,24 +56,24 @@ measure [options] someCommand arg1 arg2...
 
 ### ソースコード
 
-このプログラムは様々な言語のバージョンが存在します。  
+このプログラムは様々な言語のエディションが存在します。  
 それぞれ異なるコマンドが用意されているため,言語を指定して利用することもできます。  
 言語によってバージョンが異なるので注意してください。使える機能が異なります。  
-`measure` と指定すると,Cのバイナリ (`measure-c`) が実行されます。
+コマンド `measure` は標準でCのバイナリ (`measure-c`) へのリンクになっている。
 
 | コマンド | 言語 | バージョン |
-|:-:|:-:|:-:|
-| `measure-c` | C | 2.2 |
-| `measure-cpp` | C++ | 2.2 |
-| `measure-rs` | Rust | 2.2 |
-| `measure-go` | Go | 2.2 |
-| `measure-swift` | Swift | 2.2 |
-| `measure-php` | PHP | 2.2 |
-| `measure-py` | Python | 2.2 |
-| `measure-rb` | Ruby | 2.2 |
-| `measure-cs` | C# | 2.2 |
-| `measure-js` | JavaScript | 2.2 |
-| `measure-java` | Java | 2.2 |
+|:--|:-:|:-:|
+| `measure-c` | C | 2.3 |
+| `measure-cpp` | C++ | 2.3 |
+| `measure-rs` | Rust | 2.3 |
+| `measure-go` | Go | 2.3 |
+| `measure-swift` | Swift | 2.3 |
+| `measure-js` | JavaScript | 2.3 |
+| `measure-py` | Python | 2.3 |
+| `measure-php` | PHP | 2.3 |
+| `measure-rb` | Ruby | 2.3 |
+| `measure-java` | Java | 2.3 |
+| `measure-cs` | C# | 2.3 |
 | `measure-jl` | Julia | 2.2 |
 
 ### コンパイル

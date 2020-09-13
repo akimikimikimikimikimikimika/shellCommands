@@ -2,6 +2,7 @@
 .vscode
 *.o
 Random/Cargo/target.zip
+Random/Cargo/target
 bin/appearance
 bin/mui
 bin/random
@@ -13,6 +14,8 @@ bin/random-rust
 bin/random-swift
 bin/thread
 bin/trash
+bin/*-linux
 Archive/java/*.class
-Time Measurement/C2
+Time Measurement/Rust/target
+Cargo.lock
 __pycache__

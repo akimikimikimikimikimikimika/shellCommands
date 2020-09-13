@@ -1,4 +1,9 @@
-#include <stdbool.h>
+enum CommandMode {
+	CMMain,
+	CMHelp,
+	CMVersion
+};
+typedef enum CommandMode CM;
 
 enum COType {
 	COInherit,
@@ -9,6 +14,7 @@ struct ChildOutput {
 	enum COType type;
 	const char* file;
 };
+typedef struct ChildOutput CO;
 
 enum ROType {
 	ROStdout,
@@ -19,15 +25,27 @@ struct ResultOutput {
 	enum ROType type;
 	const char* file;
 };
+typedef struct ResultOutput RO;
+
+enum MultipleMode {
+	MMSerial,
+	MMSpawn,
+	MMThread,
+	MMNone
+};
+typedef enum MultipleMode MM;
 
 struct data {
-	struct ChildOutput out;
-	struct ChildOutput err;
-	struct ResultOutput result;
-	bool multiple;
+	CM mode;
+	CO out;
+	CO err;
+	RO result;
+	MM multiple;
+	char** commands;
 	int count;
 };
-struct data initData();
+typedef struct data D;
+D initData();
 
-struct ChildOutput s2co(const char*);
-struct ResultOutput s2ro(const char*);
+CO s2co(const char*);
+RO s2ro(const char*);

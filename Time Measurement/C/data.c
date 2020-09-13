@@ -2,21 +2,23 @@
 #include <stdlib.h>
 #include "general.h"
 
-struct data initData() {
-	struct data d;
+D initData() {
+	D d;
+	d.mode = CMMain;
 	d.out.type = COInherit;
 	d.out.file=NULL;
 	d.err.type = COInherit;
 	d.err.file=NULL;
 	d.result.type = ROStderr;
 	d.result.file=NULL;
-	d.multiple = false;
+	d.multiple = MMNone;
 	d.count = 0;
+	d.commands = NULL;
 	return d;
 }
 
-struct ChildOutput s2co(const char* v) {
-	struct ChildOutput co;
+CO s2co(const char* v) {
+	CO co;
 	co.file = NULL;
 	if (!strcmp(v,"inherit")) co.type=COInherit;
 	else if (!strcmp(v,"discard")) {
@@ -30,8 +32,8 @@ struct ChildOutput s2co(const char* v) {
 	return co;
 }
 
-struct ResultOutput s2ro(const char* v) {
-	struct ResultOutput ro;
+RO s2ro(const char* v) {
+	RO ro;
 	ro.file = NULL;
 	if (!strcmp(v,"stdout")) ro.type=ROStdout;
 	else if (!strcmp(v,"stderr")) ro.type=ROStderr;

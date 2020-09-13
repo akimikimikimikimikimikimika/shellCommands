@@ -1,40 +1,38 @@
-# cmd := clang++/g++/clang/gcc
-# ext := cpp/c
-# std := c++2a/c17
-# binFile := ../bin/measure
-
-option := -std=${std} -O3
-
-src = $(shell find . -path "./${searchPath}")
-obj = ${src:%.${ext}=%.o}
-
-${obj}: %.o: %.${ext} # compiling
-	@${cmd} -c ${option} -o $@ $<
-bin: ${obj} # linking
-	@${cmd} -o ${binFile} ${option} ${obj}
-clean:
-	@rm -f ${obj}
-build: bin clean
-
-
-
 build-clang++:
-	@make build -e cmd="clang++" ext=cpp std=c++2a binFile=../bin/measure-cpp searchPath=source.cpp
+	@clang++ -O3 -std=c++2a -o ../bin/measure-cpp C++/*.cpp
+debug-clang++:
+	@clang++ -g -O0 -std=c++2a -o /tmp/debugging-bin C++/*.cpp
+	@lldb /tmp/debugging-bin
+	@rm /tmp/debugging-bin
 build-g++:
-	@make build -e cmd="g++ -pthread -lstdc++fs" ext=cpp std=c++2a binFile=../bin/measure-cpp searchPath=source.cpp
+	@g++ -O3 -std=c++2a -pthread -lstdc++fs -o ../bin/measure-cpp C++/*.cpp
+debug-g++:
+	@g++ -g -O0 -std=c++2a -pthread -lstdc++fs -o /tmp/debugging-bin C++/*.cpp
+	@gdb /tmp/debugging-bin
+	@rm /tmp/debugging-bin
 build-clang:
-	@make build -e cmd=clang ext=c std=c17 binFile=../bin/measure-c searchPath="C/*.c"
+	@clang -O3 -std=c17 -pthread -o ../bin/measure-c C/*.c
+debug-clang:
+	@clang -g -O0 -std=c17 -pthread -o /tmp/debugging-bin C/*.c
+	@lldb /tmp/debugging-bin
+	@rm /tmp/debugging-bin
 build-gcc:
-	@make build -e cmd="gcc -lm -lrt" ext=c std=c17 binFile=../bin/measure-c searchPath="C/*.c"
+	@gcc -O3 -std=c17 -lm -lrt -lpthread -o ../bin/measure-c C/*.c
+debug-gcc:
+	@clang -g -O0 -std=c17 -lm -lrt -lpthread -o /tmp/debugging-bin C/*.c
+	@gdb /tmp/debugging-bin
+	@rm /tmp/debugging-bin
 build-swift:
-	@swiftc *.swift -o ../bin/measure-swift
+	@swiftc Swift/*.swift -o ../bin/measure-swift
 build-go:
-	@go build -o ../bin/measure-go *.go
+	@go build -ldflags="-s -w" -o ../bin/measure-go Go/*.go
 build-rust:
-	@rustc *.rs -C opt-level=3 -o ../bin/measure-rs
+	@cd Rust && cargo build --release
+	@mv Rust/target/release/measure ../bin/measure-rs
+	@rm -rf Rust/target
 build-java:
-	@javac Measure.java -Xlint:unchecked
-	@jar cfe measure-java.jar Measure *.class
-	@rm -f *.class
+	@cd Java && javac *.java -Xlint:unchecked
+	@cd Java && jar cfe ../measure-java.jar measure *.class
+	@cd Java && rm -f *.class
 build-cs:
-	@mcs source.cs -out:measure-cs.exe
+	@mcs C#/*.cs -out:measure-cs.exe
