@@ -1,3 +1,4 @@
+#include <cstring>
 #include "lib.hpp"
 
 void error(string text) {

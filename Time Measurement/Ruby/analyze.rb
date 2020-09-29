@@ -7,10 +7,10 @@ def argAnalyze(d)
 	else
 		case l[0]
 			when "-h","help","-help","--help" then
-				d.mode=CM::help
+				d.mode=CM::HELP
 				return
 			when "-v","version","-version","--version" then
-				d.mode=CM::version
+				d.mode=CM::VERSION
 				return
 		end
 	end

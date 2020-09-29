@@ -1,5 +1,4 @@
 .DS_Store
-.vscode
 *.o
 Random/Cargo/target.zip
 Random/Cargo/target
@@ -15,7 +14,9 @@ bin/random-swift
 bin/thread
 bin/trash
 bin/*-linux
-Archive/java/*.class
+bin/*-debug
+bin/*.dSYM
+*.class
 Time Measurement/Rust/target
 Cargo.lock
 __pycache__

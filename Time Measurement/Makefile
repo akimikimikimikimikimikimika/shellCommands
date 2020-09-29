@@ -1,27 +1,19 @@
 build-clang++:
 	@clang++ -O3 -std=c++2a -o ../bin/measure-cpp C++/*.cpp
 debug-clang++:
-	@clang++ -g -O0 -std=c++2a -o /tmp/debugging-bin C++/*.cpp
-	@lldb /tmp/debugging-bin
-	@rm /tmp/debugging-bin
+	@clang++ -g -O0 -std=c++2a -o measure-debug C++/*.cpp
 build-g++:
 	@g++ -O3 -std=c++2a -pthread -lstdc++fs -o ../bin/measure-cpp C++/*.cpp
 debug-g++:
-	@g++ -g -O0 -std=c++2a -pthread -lstdc++fs -o /tmp/debugging-bin C++/*.cpp
-	@gdb /tmp/debugging-bin
-	@rm /tmp/debugging-bin
+	@g++ -g -O0 -std=c++2a -pthread -lstdc++fs -o measure-debug C++/*.cpp
 build-clang:
 	@clang -O3 -std=c17 -pthread -o ../bin/measure-c C/*.c
 debug-clang:
-	@clang -g -O0 -std=c17 -pthread -o /tmp/debugging-bin C/*.c
-	@lldb /tmp/debugging-bin
-	@rm /tmp/debugging-bin
+	@clang -g -O0 -std=c17 -pthread -o measure-debug C/*.c
 build-gcc:
 	@gcc -O3 -std=c17 -lm -lrt -lpthread -o ../bin/measure-c C/*.c
 debug-gcc:
-	@clang -g -O0 -std=c17 -lm -lrt -lpthread -o /tmp/debugging-bin C/*.c
-	@gdb /tmp/debugging-bin
-	@rm /tmp/debugging-bin
+	@clang -g -O0 -std=c17 -lm -lrt -lpthread -o measure-debug C/*.c
 build-swift:
 	@swiftc Swift/*.swift -o ../bin/measure-swift
 build-go:
@@ -36,3 +28,8 @@ build-java:
 	@cd Java && rm -f *.class
 build-cs:
 	@mcs C#/*.cs -out:measure-cs.exe
+
+clean-debug:
+	@rm -f measure-debug
+	@rm -rf *.dSYM
+	@rm -f Java/*.class

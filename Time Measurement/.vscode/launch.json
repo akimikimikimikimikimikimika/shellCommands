@@ -1,0 +1,120 @@
+// BPNS: break point not supported
+{
+	"version": "0.2.0",
+	"configurations": [
+		// measure-js
+		{
+			"name": "measure-js",
+			"type": "node",
+			"request": "launch",
+			"cwd": "${workspaceRoot}/JavaScript",
+			"program": "main.js",
+			"outputCapture": "std",
+			"stopOnEntry": true,
+			"args": ["args","1","2","3"]
+		},
+		// measure-py
+		{
+			"name": "measure-py",
+			"type": "python",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/Python",
+			"program": "main.py",
+			"args": ["args","1","2","3"]
+		},
+		// measure-rb
+		{
+			"name": "measure-rb",
+			"type": "Ruby",
+			"request": "launch",
+			"cwd": "${workspaceRoot}/Ruby",
+			"program": "main.rb",
+			"args": ["args","1","2","3"]
+		},
+		// measure-php
+		{
+			"name": "measure-php",
+			"type": "php",
+			"request": "launch",
+			"cwd": "${workspaceRoot}/PHP",
+			"program": "main.php",
+			"args": ["args","1","2","3"]
+		},
+		// measure-go
+		{
+			"name": "measure-go",
+			"type": "go",
+			"request": "launch",
+			"mode": "auto",
+			"program": "${workspaceRoot}/Go",
+			"args": ["args","1","2","3"]
+		},
+		// measure-java
+		{
+			"name": "measure-java",
+			"type": "java",
+			"request": "launch",
+			"classPaths": ["${workspaceFolder}/Java"],
+			"mainClass": "measure",
+			"args": ["args","1","2","3"],
+			"preLaunchTask": "debug measure-java",
+			"postDebugTask": "clean debug files"
+		},
+		// measure-cpp (clang)
+		{
+			"name": "measure-cpp (clang)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/measure-debug",
+			"args": ["args","1","2","3"],
+			"cwd": ".",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb",
+			"preLaunchTask": "debug measure-cpp (clang)",
+			"postDebugTask": "clean debug files"
+		},
+		// measure-cpp (gcc)
+		{
+			"name": "measure-cpp (gcc)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/measure-debug",
+			"args": ["args","1","2","3"],
+			"cwd": ".",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb",
+			"preLaunchTask": "debug measure-cpp (gcc)",
+			"postDebugTask": "clean debug files"
+		},
+		// measure-c (clang)
+		{
+			"name": "measure-c (clang)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/measure-debug",
+			"args": ["args","1","2","3"],
+			"cwd": ".",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb",
+			"preLaunchTask": "debug measure-c (clang)",
+			"postDebugTask": "clean debug files"
+		},
+		// measure-c (gcc)
+		{
+			"name": "measure-c (gcc)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/measure-debug",
+			"args": ["args","1","2","3"],
+			"cwd": ".",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb",
+			"preLaunchTask": "debug measure-c (gcc)",
+			"postDebugTask": "clean debug files"
+		},
+	]
+}

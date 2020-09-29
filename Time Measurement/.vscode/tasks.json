@@ -1,0 +1,67 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		// measure-cpp
+		{
+			"label": "debug measure-cpp (clang)",
+			"type": "shell",
+			"command": "make debug-clang++",
+			"group": "build",
+			"presentation": {
+				"reveal": "silent"
+			}
+		},
+		{
+			"label": "debug measure-cpp (gcc)",
+			"type": "shell",
+			"command": "make debug-g++",
+			"group": "build",
+			"presentation": {
+				"reveal": "silent"
+			}
+		},
+		// measure-c
+		{
+			"label": "debug measure-c (clang)",
+			"type": "shell",
+			"command": "make debug-clang",
+			"group": "build",
+			"presentation": {
+				"reveal": "silent"
+			}
+		},
+		{
+			"label": "debug measure-c (gcc)",
+			"type": "shell",
+			"command": "make debug-gcc",
+			"group": "build",
+			"presentation": {
+				"reveal": "silent"
+			}
+		},
+		// measure-java
+		{
+			"label": "debug measure-java",
+			"type": "shell",
+			"command": "javac *.java",
+			"options": {
+				"cwd": "${workspaceRoot}/Java"
+			},
+			"group": "build",
+			"presentation": {
+				"reveal": "silent"
+			}
+		},
+		// cleanup
+		{
+			"label": "clean debug files",
+			"type": "shell",
+			"command": "make clean-debug",
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "silent"
+			}
+		}
+	]
+}
