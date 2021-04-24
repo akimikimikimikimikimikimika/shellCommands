@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -27,42 +26,24 @@ void execute(D *d) {
 		case MMNone:   single(&x); break;
 		case MMSerial: serial(&x); break;
 		case MMThread: thread(&x); break;
-		case MMSpawn:  spawn(&x);  break;
+		case MMSpawn:   spawn(&x); break;
 	}
 
 	exit(x.ec<0?1:x.ec);
 }
 
 void single(X *x) {
-	TIMETYPE st,en;
-	char t[20];
-	D *d=x->d;
-	SHIFT();
-	SP p=sp(d,d->commands);
+	single_setup();
 
 	GETTIME(st);
 	runSP(&p);
 	GETTIME(en);
 
-	if (!p.error) {
-		descTime(x->r,st,en);
-		sprintf(t,"process id: %d\n",p.pid);
-		write(x->r,t,strlen(t));
-		descEC(x,&p);
-		x->ec=p.ec;
-	}
+	single_report();
 }
 
 void serial(X *x) {
-	TIMETYPE st,en;
-	char t[20];
-	D *d=x->d;
-
-	char *args[]={getenv("SHELL"),"-c",NULL,NULL};
-	if (args[0]==NULL) args[0]="sh";
-	SP pl[d->count];
-	for (int n=0;n<d->count;n++) pl[n]=sp(d,args);
-	int ln=d->count-1;
+	serial_setup();
 
 	GETTIME(st);
 	for (int n=0;n<d->count;n++) {
@@ -75,33 +56,23 @@ void serial(X *x) {
 	}
 	GETTIME(en);
 
-	if (!pl[ln].error) {
-		descTime(x->r,st,en);
-		for (int n=0;n<d->count;n++) {
-			if (pl[n].pid<0) sprintf(t,"process%d id: N/A\n",n+1);
-			else sprintf(t,"process%d id: %d\n",n+1,pl[n].pid);
-			write(x->r,t,strlen(t));
-		}
-		descEC(x,&pl[ln]);
-		x->ec=pl[ln].ec;
-	}
+	serial_report();
 }
 
 void spawn(X *x) {
-	PARALLEL_SETUP();
+	parallel_setup();
 
 	GETTIME(st);
 	for (int n=0;n<d->count;n++) startSP(&pl[n]);
 	for (int n=0;n<d->count;n++) waitSP(&pl[n]);
 	GETTIME(en);
 
-	PARALLEL_REPORT();
-
+	parallel_report();
 }
 
 void threadFunc(void*);
 void thread(X *x) {
-	PARALLEL_SETUP();
+	parallel_setup();
 	void *f=(void*)threadFunc;
 	pthread_t tl[d->count];
 
@@ -110,12 +81,7 @@ void thread(X *x) {
 	for (int n=0;n<d->count;n++) ERR(pthread_join(tl[n],NULL));
 	GETTIME(en);
 
-	for (int n=0;n<d->count;n++) {
-		free(pl[n].args);
-		if (pl[n].error) err=1;
-	}
-
-	PARALLEL_REPORT();
+	parallel_report();
 }
 
 void threadFunc(void *pt) {

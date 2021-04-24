@@ -42,7 +42,7 @@ class execute {
 			time: \(descTime(st:st,en:en))
 			process id: \(p.pid!)
 			\(p.descEC())
-		""")+"\n"
+		""")
 
 		ec=p.ec
 	}
@@ -61,10 +61,11 @@ class execute {
 		}
 		let en=Date()
 
-		res+="time: \(descTime(st:st,en:en))\n"
-		for p in pl { res+="process\(p.order) id: \(p.pid?.description ?? "N/A")\n" }
-		res+="\(lp.descEC())\n"
-
+		res=(
+			["time: \(descTime(st:st,en:en))"] +
+			pl.map { p in "process\(p.order) id: \(p.pid?.description ?? "N/A")" } +
+			[lp.descEC(),""]
+		).joined(separator:"\n")
 		ec=lp.ec
 	}
 
@@ -143,24 +144,24 @@ class execute {
 		}
 		static func multiple(_ x:execute,_ commands:[String]) -> [SP] {
 			let sh=ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/sh"
-			var l:[SP]=[]
-			l.reserveCapacity(commands.count)
 			var n=1
-			for c in commands {
+			return commands.map { c in
 				let p=SP(x,sh,["-c",c])
 				p.order=n
 				n+=1
-				l.append(p)
+				return p
 			}
-			return l
 		}
 		static func collect(_ x:execute,_ pl:[SP],_ st:Date,_ en:Date) {
-			x.res+="time: \(x.descTime(st:st,en:en))\n"
+			var rl:[String]=makeArray(pl.count*2+2)
+			rl.append("time: \(x.descTime(st:st,en:en))")
 			for p in pl {
-				x.res+="process\(p.order) id: \(p.pid!)\n"
-				x.res+=p.descEC()+"\n"
 				if p.ec>x.ec { x.ec=p.ec }
+				rl.append("process\(p.order) id: \(p.pid!)")
+				rl.append(p.descEC())
 			}
+			rl.append("")
+			x.res=rl.joined(separator:"\n")
 		}
 
 		public func start() {

@@ -14,9 +14,15 @@ bin/random-swift
 bin/thread
 bin/trash
 bin/*-linux
-bin/*-debug
+*-debug
+*-debug.cs
 bin/*.dSYM
 *.class
 Time Measurement/Rust/target
+Time Measurement/NET/bin
+Time Measurement/NET/obj
 Cargo.lock
+.idea
+.vscode/*.log
+Time Measurement/.vscode/*.log
 __pycache__

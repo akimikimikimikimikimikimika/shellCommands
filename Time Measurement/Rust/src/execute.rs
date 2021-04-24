@@ -3,7 +3,6 @@ use std::fs::{File,OpenOptions};
 use std::io::{Write,stdout,stderr};
 use std::thread;
 use std::sync::{Mutex,Arc};
-use std::fmt::Debug;
 use std::fmt::Write as FmtWrite;
 use std::time::SystemTime;
 
@@ -14,14 +13,14 @@ type EC = Option<i32>;
 struct Exec<'x> {
 	d:&'x Data,
 	ec:EC,
-	res:&'x mut String
+	res:String
 }
 
 pub fn execute(d:&Data) {
 	let mut x = Exec {
 		d:d,
 		ec:Some(0),
-		res:&mut String::new()
+		res:String::new()
 	};
 	let r=ro2f(&d.result);
 
@@ -43,15 +42,18 @@ pub fn execute(d:&Data) {
 }
 
 fn single(x:&mut Exec) {
-	let mut p = sp(x,&x.d.command[0],&x.d.command[1..]);
+	let mut p = sp(x,&x.d.command[0],&x.d.command[1..],&x.d.command.join(" "));
 
 	let st = SystemTime::now();
 	p.run();
 	let en = SystemTime::now();
 
-	add!(x.res,"time: {}\n",desc_time(st,en));
-	add!(x.res,"process id: {}\n",p.pid.unwrap());
-	add!(x.res,"{}\n",p.desc_ec());
+	x.res=vec![
+		format!("time: {}",desc_time(st,en)),
+		format!("process id: {}",p.pid.unwrap()),
+		p.desc_ec(),String::new()
+	].join("\n");
+
 	x.ec=p.ec;
 }
 
@@ -63,19 +65,26 @@ fn serial(x:&mut Exec) {
 	for p in &mut pl {
 		p.run();
 		if p.ec!=Some(0) {
-			ln=p.order-1;
+			ln=p.order;
 			break;
 		}
 	}
 	let en = SystemTime::now();
 
 	let lp = &pl[ln];
-	add!(x.res,"time: {}\n",desc_time(st,en));
+
+	let mut rl=make_vs(pl.len()+3);
+	rl.push(format!("time: {}",desc_time(st,en)));
 	for p in &pl {
-		add!(x.res,"process{} id: ",p.order);
-		add!(x.res,"{}\n",p.pid.map_or(S!("N/A"),|pid| pid.to_string()));
+		rl.push(format!(
+			"process{} id: {}",
+			p.order,
+			p.pid.map_or(S!("N/A"),|pid| pid.to_string())
+		));
 	}
-	add!(x.res,"{}\n",lp.desc_ec());
+	rl.push(lp.desc_ec());
+	rl.push(String::new());
+	x.res=rl.join("\n");
 
 	x.ec=lp.ec;
 }
@@ -89,14 +98,21 @@ fn spawn(x:&mut Exec) {
 	let en = SystemTime::now();
 
 	let mut ec:i32=0;
-	add!(x.res,"time: {}\n",desc_time(st,en));
+
+	let mut rl=make_vs(pl.len()*2+2);
+	rl.push(format!("time: {}",desc_time(st,en)));
 	for p in &pl {
-		add!(x.res,"process{} id: ",p.order);
-		add!(x.res,"{}\n",p.pid.unwrap());
-		add!(x.res,"{}\n",p.desc_ec());
 		let pec=p.ec.unwrap_or(1);
 		if pec>ec { ec=pec; }
+		rl.push(format!(
+			"process{} id: {}",
+			p.order,
+			p.pid.unwrap()
+		));
+		rl.push(p.desc_ec());
 	}
+	rl.push(String::new());
+	x.res=rl.join("\n");
 
 	x.ec=Some(ec);
 }
@@ -120,16 +136,23 @@ fn thread_process(x:&mut Exec) {
 	let en = SystemTime::now();
 
 	let mut ec:i32=0;
-	add!(x.res,"time: {}\n",desc_time(st,en));
+
+	let mut rl=make_vs(al.len()*2+2);
+	rl.push(format!("time: {}",desc_time(st,en)));
 	for a in &al {
 		let m=a.clone();
 		let p=m.lock().unwrap();
-		add!(x.res,"process{} id: ",p.order);
-		add!(x.res,"{}\n",p.pid.unwrap());
-		add!(x.res,"{}\n",p.desc_ec());
 		let pec=p.ec.unwrap_or(1);
 		if pec>ec { ec=pec; }
+		rl.push(format!(
+			"process{} id: {}",
+			p.order,
+			p.pid.unwrap()
+		));
+		rl.push(p.desc_ec());
 	}
+	rl.push(String::new());
+	x.res=rl.join("\n");
 
 	x.ec=Some(ec);
 }
@@ -137,11 +160,12 @@ fn thread_process(x:&mut Exec) {
 struct SP {
 	command:Command,
 	child:Option<Child>,
+	description:String,
 	pub order:usize,
 	pub pid:Option<u32>,
 	pub ec:EC
 }
-fn sp(x:&Exec,file:&String,args:&[String]) -> SP {
+fn sp(x:&Exec,file:&String,args:&[String],desc:&String) -> SP {
 	let mut cmd = Command::new(&file);
 	cmd.args(args.iter())
 		.stdin(Stdio::inherit())
@@ -150,6 +174,7 @@ fn sp(x:&Exec,file:&String,args:&[String]) -> SP {
 	return SP {
 		command:cmd,
 		child:None,
+		description:desc.to_string(),
 		order:0,
 		pid:None,
 		ec:Some(0)
@@ -160,11 +185,11 @@ fn multiple(x:&Exec,commands:&[String]) -> Vec<SP> {
 		Some(s) => S!(s),
 		None => S!("sh")
 	};
-	let mut n:usize=0;
+	let mut n:usize=1;
 	let mut l:Vec<SP>=Vec::new();
 	l.reserve(commands.len());
 	for c in commands.iter() {
-		let mut p=sp(x,&sh,&[S!("-c"),S!(c)]);
+		let mut p=sp(x,&sh,&[S!("-c"),S!(c)],c);
 		p.order=n;
 		n+=1;
 		l.push(p);
@@ -182,12 +207,12 @@ trait SPAction {
 }
 impl SPAction for SP {
 	fn start(&mut self) {
-		let c=unwrap_or_error(self.command.spawn(),&S!("実行に失敗しました"));
+		let c=unwrap_or_error(self.command.spawn(),&format!("実行に失敗しました: {}",self.description));
 		self.pid=Some(c.id());
 		self.child=Some(c);
 	}
 	fn wait(&mut self) {
-		let s=unwrap_or_error(self.child.as_mut().unwrap().wait(),&S!("実行に失敗しました"));
+		let s=unwrap_or_error(self.child.as_mut().unwrap().wait(),&format!("実行に失敗しました: {}",self.description));
 		self.ec=s.code();
 	}
 	fn desc_ec(&self) -> String {
@@ -196,11 +221,6 @@ impl SPAction for SP {
 			|v| format!("exit code: {}",v)
 		);
 	}
-}
-
-fn unwrap_or_error<T,E>(r:Result<T,E>,message:&String) -> T where E : Debug {
-	if r.is_err() { eprintln!("{}",message); exit(1); }
-	else { return r.unwrap(); }
 }
 
 

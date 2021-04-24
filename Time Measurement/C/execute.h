@@ -13,6 +13,7 @@ typedef struct exec X;
 struct subprocess {
 	CO *out;
 	CO *err;
+	char* description;
 	char** args;
 	int pid;
 	int ec;
@@ -20,7 +21,7 @@ struct subprocess {
 };
 typedef struct subprocess SP;
 
-SP sp(D*,char** args);
+SP sp(D*,char** args,char* desc);
 void startSP(SP*);
 void waitSP(SP*);
 void runSP(SP*);

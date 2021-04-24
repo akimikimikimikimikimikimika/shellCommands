@@ -71,11 +71,13 @@ async function spawn() {
 	await Promise.all(pl.map(p=>p.start()));
 	let en=now();
 
-	res=`time: ${descTime(en-st)}\n`;
-	pl.forEach(p=>{
-		res+=`process${p.order} id: ${p.pid}\n${descEC(p.ec,p.signal)}\n`;
-		if (p.ec>ec) ec=p.ec;
-	});
+	res=[
+		`time: ${descTime(en-st)}`,
+		...pl.flatMap(p=>{
+			if (p.ec>ec) ec=p.ec;
+			return [`process${p.order} id: ${p.pid}`,p.descEC()];
+		}),""
+	].flat().join("\n");
 }
 
 class SP {

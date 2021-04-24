@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include "execute.h"
 
-SP sp(D *d,char** args) {
+SP sp(D *d,char** args,char* desc) {
 	SP p;
 	p.out=&d->out;
 	p.err=&d->err;
@@ -14,6 +14,7 @@ SP sp(D *d,char** args) {
 	p.pid=-1;
 	p.ec=0;
 	p.error=0;
+	p.description=desc;
 	return p;
 }
 
@@ -37,6 +38,7 @@ void connect(CO* co,int sfd) {
 	dup2(fd,sfd);
 	close(fd);
 }
+
 void startSP(SP *p) {
 	p->pid=fork();
 	if (p->pid<0) {
@@ -47,7 +49,7 @@ void startSP(SP *p) {
 		connect(p->out,STDOUT_FILENO);
 		connect(p->err,STDERR_FILENO);
 		if (execvp(p->args[0],p->args)<0) {
-			fputs("プロセスの実行に失敗しました\n",stderr);
+			fprintf(stderr,"実行に失敗しました: %s\n",p->description);
 			exit(255);
 		}
 	}

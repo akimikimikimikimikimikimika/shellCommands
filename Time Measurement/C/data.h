@@ -1,3 +1,5 @@
+#include <stdlib.h> // for size_t
+
 enum CommandMode {
 	CMMain,
 	CMHelp,
@@ -42,7 +44,7 @@ struct data {
 	RO result;
 	MM multiple;
 	char** commands;
-	int count;
+	size_t count;
 };
 typedef struct data D;
 D initData();

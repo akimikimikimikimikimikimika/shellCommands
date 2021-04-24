@@ -36,11 +36,10 @@ def execute(rd:data):
 
 def single():
 	global res,ec
-	p=SP(d.command)
+	p=SP(d.command," ".join(d.command))
 
 	st=now()
-	p.start()
-	p.wait()
+	p.run()
 	en=now()
 
 	res=clean(f"""
@@ -57,8 +56,7 @@ def serial():
 
 	st=now()
 	for p in pl:
-		p.start()
-		p.wait()
+		p.run()
 		if p.ec!=0:
 			lp=p
 			break
@@ -100,19 +98,21 @@ def thread():
 class SP:
 	popen:subprocess.Popen
 	args=None
+	description=""
 	order=0
 	pid=-1
 	ec=0
 
-	def __init__(self,args):
+	def __init__(self,args,desc):
 		self.args=args
+		self.description=desc
 
 	@classmethod
 	def multiple(cls,commands):
 		n=1
 		l=[]
 		for c in commands:
-			p=SP(c)
+			p=SP(c,c)
 			p.order=n
 			l+=[p]
 			n+=1
@@ -124,11 +124,11 @@ class SP:
 
 		l=[f"time: {descTime(en-st)}"]
 		for p in pl:
+			if p.ec>ec: ec=p.ec
 			l+=[
 				f"process{p.order} id: {p.pid}",
 				p.descEC()
 			]
-			if p.ec>ec: ec=p.ec
 		l+=[""]
 		res=linesep.join(l)
 
@@ -138,7 +138,7 @@ class SP:
 		try:
 			self.popen=subprocess.Popen(self.args,shell=s,stdout=o,stderr=e)
 			self.pid=self.popen.pid
-		except: error("実行に失敗しました")
+		except: error(f"実行に失敗しました: {self.description}")
 
 	def wait(self):
 		self.ec=self.popen.wait()

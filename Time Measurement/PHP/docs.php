@@ -6,8 +6,8 @@ function help() {
 	print clean(<<<"Help"
 
 		 使い方:
-		  measure [options] [command] [arg1] [arg2]…
-		  measure -multiple [options] "[command1]" "[command2]"…
+		  measure-php [options] [command] [arg1] [arg2]…
+		  measure-php -multiple [options] "[command1]" "[command2]"…
 
 		  [command] を実行し,最後にその所要時間を表示します
 
@@ -45,7 +45,7 @@ function help() {
 		    • serial
 		     指定した複数のコマンドをその順に実行していきます
 		    • spawn,parallel
-		     シェルの同時実行により並列実行します
+		     シェルの同時起動により並列実行します
 
 		    ※ -m オプションについてはエディションによって機能が異なるので,それぞれにおいてヘルプを確認してください。
 
@@ -55,7 +55,7 @@ function help() {
 function version() {
 	print clean(<<<"Version"
 
-		 measure v2.3
+		 measure v2.4
 		 PHP エディション (measure-php)
 
 	Version.PHP_EOL);

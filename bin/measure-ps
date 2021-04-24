@@ -1,0 +1,30 @@
+#! /bin/sh
+
+progPath="../Time Measurement/PowerShell/main.ps1"
+
+notFoundError() {
+	echo "ソースファイルが見つかりません" >&2
+	exit 1
+}
+
+bs=\\
+parse() {
+	local x="$(echo $1 | sed -Ee "s/$bs$bs/$bs$bs$bs$bs/g" | sed -Ee "s/$bs\"/$bs$bs\"/g" | sed -Ee "s/$bs'/$bs$bs'/g" | sed -Ee "s/$bs /$bs$bs /g")"
+	echo "$x"
+}
+
+path="$(dirname "$0")/$(dirname "$progPath")"
+if [ ! -d "$path" ]; then
+	notFoundError
+fi
+path="$(cd "$path"; pwd)/$(basename "$progPath")"
+if [ ! -f "$path" ]; then
+	notFoundError
+fi
+
+args="pwsh `parse "$path"`"
+for x in "$@" ; do
+	args="$args `parse "$x"`"
+done
+
+exec sh -c "$args"

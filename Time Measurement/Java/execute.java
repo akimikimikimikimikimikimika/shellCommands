@@ -29,7 +29,7 @@ public class execute {
 	}
 
 	private static void single() {
-		SP p=new SP(d.command);
+		SP p=new SP(d.command,String.join(" ",d.command));
 
 		long st=System.nanoTime();
 		p.run();
@@ -94,16 +94,19 @@ public class execute {
 	private static class SP extends Thread {
 		private ProcessBuilder pb;
 		private Process p;
+		private String description;
 		public int order=0;
 		public long pid=-1;
 		public int ec=0;
 
-		SP(String ...args) {
+		SP(String[] args,String desc) {
 			pb=new ProcessBuilder(Arrays.asList(args));
 			pb.redirectOutput(i);
 			pb.redirectOutput(o);
 			pb.redirectError(e);
+			description=desc;
 		}
+
 		public static SP[] multiple(String ...commands) {
 			String sh="sh";
 			try{
@@ -113,13 +116,15 @@ public class execute {
 			SP[] pdl=new SP[commands.length];
 			int n=1;
 			for (String c:commands) {
-				SP pd=new SP(sh,"-c",c);
+				String[] args={sh,"-c",c};
+				SP pd=new SP(args,c);
 				pd.order=n;
 				pdl[n-1]=pd;
 				n++;
 			}
 			return pdl;
 		}
+
 		public static void collect(SP[] pl,long st,long en) {
 			String[] res=new String[2*pl.length+1];
 			res[0]=String.format("time: %s",descTime(en-st));
@@ -136,12 +141,16 @@ public class execute {
 			try{
 				p=pb.start();
 				pid=p.pid();
-			} catch(IOException e) { lib.error("実行に失敗しました"); }
+			} catch(IOException e) {
+				lib.error("実行に失敗しました: "+description);
+			}
 		}
+
 		public void waitProcess() {
 			try{ ec=p.waitFor(); }
 			catch(InterruptedException e) { ec=-1; }
 		}
+
 		public String descEC() {
 			if (ec<0) return "terminated due to signal";
 			else return String.format("exit code: %d",ec);
@@ -151,7 +160,6 @@ public class execute {
 			startProcess();
 			waitProcess();
 		}
-
 
 	}
 

@@ -7,10 +7,9 @@
 			"name": "measure-js",
 			"type": "node",
 			"request": "launch",
-			"cwd": "${workspaceRoot}/JavaScript",
-			"program": "main.js",
+			"program": "JavaScript/main.js",
 			"outputCapture": "std",
-			"stopOnEntry": true,
+			"stopOnEntry": false,
 			"args": ["args","1","2","3"]
 		},
 		// measure-py
@@ -18,8 +17,7 @@
 			"name": "measure-py",
 			"type": "python",
 			"request": "launch",
-			"cwd": "${workspaceFolder}/Python",
-			"program": "main.py",
+			"program": "${workspaceFolder}/Python/main.py",
 			"args": ["args","1","2","3"]
 		},
 		// measure-rb
@@ -27,8 +25,7 @@
 			"name": "measure-rb",
 			"type": "Ruby",
 			"request": "launch",
-			"cwd": "${workspaceRoot}/Ruby",
-			"program": "main.rb",
+			"program": "${workspaceRoot}/Ruby/main.rb",
 			"args": ["args","1","2","3"]
 		},
 		// measure-php
@@ -36,8 +33,7 @@
 			"name": "measure-php",
 			"type": "php",
 			"request": "launch",
-			"cwd": "${workspaceRoot}/PHP",
-			"program": "main.php",
+			"program": "${workspaceRoot}/PHP/main.php",
 			"args": ["args","1","2","3"]
 		},
 		// measure-go
@@ -45,7 +41,7 @@
 			"name": "measure-go",
 			"type": "go",
 			"request": "launch",
-			"mode": "auto",
+			"mode": "debug",
 			"program": "${workspaceRoot}/Go",
 			"args": ["args","1","2","3"]
 		},
@@ -59,6 +55,15 @@
 			"args": ["args","1","2","3"],
 			"preLaunchTask": "debug measure-java",
 			"postDebugTask": "clean debug files"
+		},
+		// measure-jl
+		{
+			"name": "measure-jl",
+			"type": "julia",
+			"request": "launch",
+			"program": "${workspaceFolder}/Julia/main.jl",
+			"args": ["args","1","2","3"],
+			"stopOnEntry": false
 		},
 		// measure-cpp (clang)
 		{
@@ -84,7 +89,7 @@
 			"cwd": ".",
 			"stopAtEntry": false,
 			"externalConsole": false,
-			"MIMode": "lldb",
+			"MIMode": "gdb",
 			"preLaunchTask": "debug measure-cpp (gcc)",
 			"postDebugTask": "clean debug files"
 		},
@@ -112,8 +117,18 @@
 			"cwd": ".",
 			"stopAtEntry": false,
 			"externalConsole": false,
-			"MIMode": "lldb",
+			"MIMode": "gdb",
 			"preLaunchTask": "debug measure-c (gcc)",
+			"postDebugTask": "clean debug files"
+		},
+		// measure-cs
+		{
+			"name": "measure-cs",
+			"type": "mono",
+			"request": "launch",
+			"program": "${workspaceFolder}/measure-debug.exe",
+			"args": ["args","1","2","3"],
+			"preLaunchTask": "debug measure-cs",
 			"postDebugTask": "clean debug files"
 		},
 	]

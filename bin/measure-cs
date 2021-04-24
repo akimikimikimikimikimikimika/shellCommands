@@ -1,6 +1,6 @@
 #! /bin/sh
 
-jarPath="../Time Measurement/measure-cs.exe"
+jarPath="../Time Measurement/binaries/measure-cs.exe"
 
 notFoundError() {
 	echo "実行ファイルが見つかりません" >&2

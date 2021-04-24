@@ -4,6 +4,7 @@ using System.IO; // TextWriter
 using System.Text.RegularExpressions; // RegEx
 using System.Threading.Tasks; // Parallel
 
+using SL = System.Collections.Generic.List<string>;
 using Opened = System.Collections.Generic.Dictionary<string,System.IO.StreamWriter>;
 using Data = lib.Data;
 using MM = lib.MM;
@@ -35,7 +36,7 @@ public static class execute {
 	}
 
 	private static void single() {
-		var p=new SP(d.command);
+		var p=new SP(d.command,string.Join(" ",d.command));
 
 		var st=DateTime.Now;
 		p.run();
@@ -63,9 +64,14 @@ public static class execute {
 		}
 		var en=DateTime.Now;
 
-		res=$"time: {descTime(en-st)}"+eol;
-		foreach (var p in pl) res+=$"process{p.order} id: {(p.pid<0?"N/A":p.pid.ToString())}"+eol;
-		res+=$"exit code: {lp.ec}"+eol;
+		var rl=new SL();
+		rl.Capacity=pl.Length+3;
+		rl.Add($"time: {descTime(en-st)}");
+		foreach (var p in pl) rl.Add($"process{p.order} id: {(p.pid<0?"N/A":p.pid.ToString())}");
+		rl.Add($"exit code: {lp.ec}");
+		rl.Add("");
+		res=String.Join(eol,rl);
+
 		ec=lp.ec;
 	}
 
@@ -77,12 +83,7 @@ public static class execute {
 		foreach (var p in pl) p.wait();
 		var en=DateTime.Now;
 
-		res=$"time: {descTime(en-st)}"+eol;
-		foreach (var p in pl) {
-			res+=$"process{p.order} id: {p.pid}"+eol;
-			res+=$"exit code: {p.ec}"+eol;
-			if (p.ec>ec) ec=p.ec;
-		}
+		SP.collect(pl,st,en);
 	}
 
 	private static void thread() {
@@ -92,21 +93,17 @@ public static class execute {
 		Parallel.ForEach(pl,p=>{ p.run(); });
 		var en=DateTime.Now;
 
-		res=$"time: {descTime(en-st)}"+eol;
-		foreach (var p in pl) {
-			res+=$"process{p.order} id: {p.pid}"+eol;
-			res+=$"exit code: {p.ec}"+eol;
-			if (p.ec>ec) ec=p.ec;
-		}
+		SP.collect(pl,st,en);
 	}
 
 	private class SP {
 		private Process p;
+		private string description;
 		public int order=0;
 		public int pid=-1;
 		public int ec=0;
 
-		public SP(string[] args) {
+		public SP(string[] args,string desc) {
 			this.p=new Process();
 			var si=p.StartInfo;
 			si.UseShellExecute=false;
@@ -125,24 +122,37 @@ public static class execute {
 				if (n>1) si.Arguments+=" ";
 				si.Arguments+=$@"""{a}""";
 			}
+			this.description=desc;
 		}
 		public static SP[] multiple(string[] commands) {
 			var sh=Environment.GetEnvironmentVariable("SHELL")??"/bin/sh";
 			var l=new SP[commands.Length];
 			int n=1;
 			foreach (var c in commands) {
-				var p=new SP(new string[] {sh,"-c",c});
+				var p=new SP(new string[] {sh,"-c",c},c);
 				p.order=n;
 				l[n-1]=p;
 				n++;
 			}
 			return l;
 		}
+		public static void collect(SP[] pl,DateTime st,DateTime en) {
+			var rl=new SL();
+			rl.Capacity=pl.Length*2+2;
+			rl.Add($"time: {descTime(en-st)}");
+			foreach (var p in pl) {
+				if (p.ec>execute.ec) execute.ec=p.ec;
+				rl.Add($"process{p.order} id: {p.pid}");
+				rl.Add($"exit code: {p.ec}");
+			}
+			rl.Add("");
+			res=String.Join(eol,rl);
+		}
 		public void start() {
 			try{
 				p.Start();
 				pid=p.Id;
-			}catch{ lib.error("実行に失敗しました"); }
+			}catch{ lib.error($"実行に失敗しました: {this.description}"); }
 		}
 		public void wait() {
 			if ((d.stdout!="inherit")&&(d.stdout!="discard")) fh(d.stdout).Write(p.StandardOutput.ReadToEnd());

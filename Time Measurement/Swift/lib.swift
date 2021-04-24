@@ -52,7 +52,7 @@ func clean(_ text:String) -> String {
 	var t=text
 	t=replace("^\\t+","",t)
 	t=replace("\\n\\t+","\n",t)
-	return t
+	return t+"\n"
 }
 
 func replace(_ of:String,_ with:String,_ text:String) -> String {
@@ -66,4 +66,10 @@ func replace(_ of:String,_ with:String,_ text:String) -> String {
 
 func write(_ fh:FH,_ text:String) {
 	fh.write(text.data(using:.utf8) ?? Data())
+}
+
+func makeArray<T>(_ size:Int) -> [T] {
+	var l:[T] = []
+	l.reserveCapacity(size)
+	return l
 }

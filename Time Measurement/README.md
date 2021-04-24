@@ -54,6 +54,8 @@ measure [options] someCommand arg1 arg2...
 
 このコマンドでは,マイクロ秒の次元から,時間の次元まで計測可能です。
 
+<br>
+
 ### ソースコード
 
 このプログラムは様々な言語のエディションが存在します。  
@@ -63,28 +65,33 @@ measure [options] someCommand arg1 arg2...
 
 | コマンド | 言語 | バージョン |
 |:--|:-:|:-:|
-| `measure-c` | C | 2.3 |
-| `measure-cpp` | C++ | 2.3 |
-| `measure-rs` | Rust | 2.3 |
-| `measure-go` | Go | 2.3 |
-| `measure-swift` | Swift | 2.3 |
-| `measure-js` | JavaScript | 2.3 |
-| `measure-py` | Python | 2.3 |
-| `measure-php` | PHP | 2.3 |
-| `measure-rb` | Ruby | 2.3 |
-| `measure-java` | Java | 2.3 |
-| `measure-cs` | C# | 2.3 |
-| `measure-jl` | Julia | 2.2 |
+| `measure-c` | C | 2.4 |
+| `measure-cpp` | C++ | 2.4 |
+| `measure-rs` | Rust | 2.4 |
+| `measure-go` | Go | 2.4 |
+| `measure-swift` | Swift | 2.4 |
+| `measure-js` | JavaScript | 2.4 |
+| `measure-py` | Python | 2.4 |
+| `measure-jl` | Julia | 2.4 |
+| `measure-php` | PHP | 2.4 |
+| `measure-rb` | Ruby | 2.4 |
+| `measure-java` | Java | 2.4 |
+| `measure-ps` | PowerShell | 2.4 |
+| `measure-cs` | C# | 2.4 |
+| `measure-net` | .NET | 2.4 |
+
+<br>
 
 ### コンパイル
 
 ```sh
 cd "Time Measurement"
-make build-clang   / make build-gcc
-make build-clang++ / make build-g++
-make build-go
-make build-rs
-make build-swift
+make build-c / make build-c-macos
+make build-cpp / make build-cpp-macos
+make build-go / make build-go-macos
+make build-rust / make build-rust-macos
+make build-swift / make build-swift-macos
 make build-java
 make build-cs
+make build-net
 ```

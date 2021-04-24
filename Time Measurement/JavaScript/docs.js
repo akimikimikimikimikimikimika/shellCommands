@@ -8,8 +8,8 @@ e.help=()=>{
 	stdout.write(clean(`
 
 		 使い方:
-		  measure [options] [command] [arg1] [arg2]…
-		  measure -multiple [options] "[command1]" "[command2]"…
+		  measure-js [options] [command] [arg1] [arg2]…
+		  measure-js -multiple [options] "[command1]" "[command2]"…
 
 		  [command] を実行し,最後にその所要時間を表示します
 
@@ -46,16 +46,8 @@ e.help=()=>{
 		     単一のコマンドとして実行します (-mを指定しない場合と同じ)
 		    • serial
 		     指定した複数のコマンドをその順に実行していきます
-		    • spawn,parallel
-		     シェルの同時実行により並列実行します
-		    • thread
-		     スレッドを利用して並列実行します
-		    • none
-		     単一のコマンドとして実行します (-mを指定しない場合と同じ)
-		    • serial
-		     指定した複数のコマンドをその順に実行していきます
 		    • spawn,async,parallel
-		     並列実行します
+		     シェルの同時起動により並列実行します
 
 		    ※ -m オプションについてはエディションによって機能が異なるので,それぞれにおいてヘルプを確認してください。
 
@@ -65,7 +57,7 @@ e.help=()=>{
 e.version=()=>{
 	stdout.write(clean(`
 
-		 measure v2.3
+		 measure v2.4
 		 JavaScript エディション (measure-js)
 
 	`));

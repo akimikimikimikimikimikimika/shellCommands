@@ -1,5 +1,5 @@
-c := clang
-cpp := clang++
+c := clang-macos
+cpp := clang++-macos
 
 main:
 	echo "usage: make [cmd]"
@@ -19,9 +19,9 @@ thread:
 measure-cpp:
 	@cd Time\ Measurement && make build-${cpp}
 measure-c:
-	@cd Time\ Measurement && make build-${c}
+	@cd Time\ Measurement/C && make build
 measure-swift:
-	@cd Time\ Measurement && make build-swift
+	@cd Time\ Measurement && make build-swift-macos
 measure-go:
 	@cd Time\ Measurement && make build-go
 measure-rs:

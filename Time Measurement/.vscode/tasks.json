@@ -52,6 +52,16 @@
 				"reveal": "silent"
 			}
 		},
+		// measure-cs
+		{
+			"label": "debug measure-cs",
+			"type": "shell",
+			"command": "make debug-cs",
+			"group": "build",
+			"presentation": {
+				"reveal": "silent"
+			}
+		},
 		// cleanup
 		{
 			"label": "clean debug files",

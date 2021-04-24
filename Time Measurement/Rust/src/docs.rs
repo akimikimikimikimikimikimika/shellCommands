@@ -2,8 +2,8 @@ pub(crate) fn help() {
 	output(S!(r#"
 
 		 使い方:
-		  measure [options] [command] [arg1] [arg2]…
-		  measure -multiple [options] "[command1]" "[command2]"…
+		  measure-rs [options] [command] [arg1] [arg2]…
+		  measure-rs -multiple [options] "[command1]" "[command2]"…
 
 		  [command] を実行し,最後にその所要時間を表示します
 
@@ -29,7 +29,7 @@ pub(crate) fn help() {
 		     指定したファイルに書き出します (追記)
 
 		   -m,-multiple [string?]
-		    複数のコマンドを実行します。通常はシェル経由で実行されます。
+		    複数のコマンドを実行します。このオプションを指定するとシェル経由で実行されます。
 		    例えば measure echo 1 のように指定していたのを
 
 		     measure -multiple "echo 1" "echo 2"
@@ -41,7 +41,7 @@ pub(crate) fn help() {
 		    • serial
 		     指定した複数のコマンドをその順に実行していきます
 		    • spawn,parallel
-		     シェルの同時実行により並列実行します
+		     シェルの同時起動により並列実行します
 		    • thread
 		     スレッドを利用して並列実行します
 
@@ -53,7 +53,7 @@ pub(crate) fn help() {
 pub(crate) fn version() {
 	output(S!(r#"
 
-		 measure v2.3
+		 measure v2.4
 		 Rust エディション (measure-rs)
 
 	"#));

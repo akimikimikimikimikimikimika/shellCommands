@@ -28,11 +28,12 @@ int fh(RO *r) {
 	}
 }
 
-#define DESC(fd,fmt,var) {\
-	char tmp[20];\
-	sprintf(tmp,fmt,var);\
-	write(fd,tmp,strlen(tmp));\
-}
+#define DESC(fd,fmt,var) {     \
+	char tmp[20];              \
+	sprintf(tmp,fmt,var);      \
+	write(fd,tmp,strlen(tmp)); \
+}                              \
+
 void descTime(int fd,TIMETYPE st,TIMETYPE en) {
 	double sec=SEC(en)-SEC(st);
 	double nsec=NSEC(en)-NSEC(st);

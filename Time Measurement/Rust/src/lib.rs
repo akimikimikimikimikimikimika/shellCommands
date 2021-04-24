@@ -1,3 +1,7 @@
+use std::fmt::Debug;
+
+pub type VS = Vec<String>;
+
 pub enum CommandMode {
 	Main(Data),
 	Help,
@@ -28,7 +32,7 @@ pub enum ResultOutput {
 pub type RO = ResultOutput;
 
 pub struct Data {
-	pub command: Vec<String>,
+	pub command: VS,
 	pub out: CO,
 	pub err: CO,
 	pub result: RO,
@@ -43,6 +47,17 @@ pub fn data() -> Data {
 		result: RO::Stderr,
 		multiple: MM::None
 	};
+}
+
+pub fn make_vs(capacity:usize) -> VS {
+	let mut vs=VS::new();
+	vs.reserve(capacity);
+	return vs;
+}
+
+pub fn unwrap_or_error<T,E>(r:Result<T,E>,message:&String) -> T where E : Debug {
+	if r.is_err() { eprintln!("{}",message); exit(1); }
+	else { return r.unwrap(); }
 }
 
 // convert str -> String

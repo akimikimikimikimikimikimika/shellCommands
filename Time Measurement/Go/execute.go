@@ -3,6 +3,7 @@ package main
 import "fmt"
 import "os"
 import "os/exec"
+import "strings"
 import "time"
 import "sync"
 import "math"
@@ -45,7 +46,7 @@ func ex(d *data) {
 }
 
 func (x *execute) single() {
-	p:=x.sp(x.d.command)
+	p:=x.sp(x.d.command,strings.Join(x.d.command," "))
 
 	st:=time.Now()
 	p.run()
@@ -73,13 +74,15 @@ func (x *execute) serial() {
 	}
 	en:=time.Now()
 
-	x.res=fmt.Sprintf("time: %s\n",x.descTime(st,en))
+	var rl=make([]string,0,len(pl)+2)
+	rl=append(rl,fmt.Sprintf("time: %s",x.descTime(st,en)))
 	for _,p:=range pl {
-		pid:=fmt.Sprintf("%d",p.pid)
-		if p.pid<0 { pid="N/A" }
-		x.res+=fmt.Sprintf("process%d id: %s\n",p.order,pid)
+		var pid string
+		if p.pid<0 { pid="N/A" } else { pid=fmt.Sprintf("%d",p.pid) }
+		rl=append(rl,fmt.Sprintf("process%d id: %s",p.order,pid))
 	}
-	x.res+=lp.descEC()+"\n"
+	rl=append(rl,lp.descEC(),"")
+	x.res=strings.Join(rl,"\n")
 
 	x.ec=lp.ec
 }
@@ -117,12 +120,13 @@ func (x *execute) threadFunc(p *sp,wg *sync.WaitGroup) {
 
 type sp struct {
 	cmd *exec.Cmd
+	description string
 	parent *execute
 	order int
 	pid int
 	ec int
 }
-func (x *execute) sp(args []string) *sp {
+func (x *execute) sp(args []string,desc string) *sp {
 
 	var cmd *exec.Cmd
 	if len(args)==1 { cmd=exec.Command(args[0]) } else
@@ -133,6 +137,7 @@ func (x *execute) sp(args []string) *sp {
 
 	return &sp{
 		cmd:cmd,
+		description:desc,
 		parent:x,
 		order:0,
 		pid:-1,
@@ -144,24 +149,26 @@ func (x *execute) spMultiple(commands []string) []*sp {
 	if !has {sh="sh"}
 	l:=make([]*sp,len(commands))
 	for n,c:=range commands {
-		var p=x.sp([]string{sh,"-c",c})
+		var p=x.sp([]string{sh,"-c",c},c)
 		p.order=n+1
 		l[n]=p
 	}
 	return l
 }
 func (x *execute) collect(pl []*sp,st time.Time,en time.Time) {
-	x.res=fmt.Sprintf("time: %s\n",x.descTime(st,en))
+	var rl=make([]string,0,len(pl)*2+2)
+	rl=append(rl,fmt.Sprintf("time: %s",x.descTime(st,en)))
 	for _,p:=range pl {
-		x.res+=fmt.Sprintf("process%d id: %d\n",p.order,p.pid)
-		x.res+=p.descEC()+"\n"
 		if p.ec>x.ec { x.ec=p.ec }
+		rl=append(rl,fmt.Sprintf("process%d id: %d",p.order,p.pid),p.descEC())
 	}
+	rl=append(rl,"")
+	x.res=strings.Join(rl,"\n")
 }
 
 func (p *sp) start() {
 	e:=p.cmd.Start()
-	if e!=nil { error("起動に失敗しました") }
+	if e!=nil { error("実行に失敗しました: "+p.description) }
 	p.pid=p.cmd.Process.Pid
 }
 func (p *sp) wait() {

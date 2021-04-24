@@ -4,8 +4,8 @@ def help():
 	print(clean("""
 
 		 使い方:
-		  measure [options] [command] [arg1] [arg2]…
-		  measure -multiple [options] "[command1]" "[command2]"…
+		  measure-py [options] [command] [arg1] [arg2]…
+		  measure-py -multiple [options] "[command1]" "[command2]"…
 
 		  [command] を実行し,最後にその所要時間を表示します
 
@@ -43,7 +43,7 @@ def help():
 		    • serial
 		     指定した複数のコマンドをその順に実行していきます
 		    • spawn,parallel
-		     シェルの同時実行により並列実行します
+		     シェルの同時起動により並列実行します
 		    • thread
 		     スレッドを利用して並列実行します
 
@@ -54,7 +54,7 @@ def help():
 def version():
 	print(clean("""
 
-		 measure v2.3
+		 measure v2.4
 		 Python エディション (measure-py)
 
 	"""),end="")

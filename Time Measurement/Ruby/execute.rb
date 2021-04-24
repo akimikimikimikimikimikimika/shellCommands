@@ -24,7 +24,7 @@ class Execute
 			when MM::FORK   then forkProcess
 		end
 
-		@@r.puts @@res
+		@@r.print @@res
 		close @@o
 		close @@e
 		close @@r
@@ -32,7 +32,7 @@ class Execute
 	end
 
 	def self.single
-		p=SP.new(@@d.command)
+		p=SP.new(@@d.command,@@d.command.join(" "))
 
 		st=Time.now
 		p.run
@@ -60,12 +60,13 @@ class Execute
 		end
 		en=Time.now
 
-		@@res="time: #{descTime en-st}\n"
-		pl.each do |p|
-			n=p.order
-			@@res+="process#{n} id: #{p.pid<0 ? "N/A" : p.pid}\n"
-		end
-		@@res+=lp.descEC
+		@@res=[
+			"time: #{descTime en-st}",
+			*pl.map do |p|
+				"process#{p.order} id: #{p.pid<0 ? "N/A" : p.pid}"
+			end,
+			lp.descEC,""
+		].join("\n")
 		@@ec=lp.ec
 	end
 
@@ -103,8 +104,9 @@ class Execute
 	end
 
 	class SP < self
-		def initialize(args)
+		def initialize(args,desc)
 			@args=args
+			@description=desc
 			@order=0
 			@pid=-1
 			@ec=0
@@ -112,25 +114,28 @@ class Execute
 		def self.multiple(commands)
 			n=1
 			commands.map do |c|
-				p=SP.new(c)
+				p=SP.new(c,c)
 				p.order=n
 				n+=1
 				p
 			end
 		end
 		def self.collect(pl,st,en)
-			@@res="time: #{descTime en-st}\n"
-			pl.each do |p|
-				n=p.order
-				@@res+="process#{n} id: #{p.pid}\n"
-				@@res+=p.descEC+"\n"
-				n+=1
-				@@ec=p.ec if p.ec>@@ec
-			end
+			@@res=[
+				"time: #{descTime en-st}",
+				pl.map do |p|
+					@@ec=p.ec if p.ec>@@ec
+					["process#{p.order} id: #{p.pid}",p.descEC]
+				end,""
+			].flatten.join("\n")
 		end
 
 		def start
-			@pid=spawn(*@args,:in=>:in,:out=>@@o,:err=>@@e)
+			begin
+				@pid=spawn(*@args,:in=>:in,:out=>@@o,:err=>@@e)
+			rescue
+				error("実行に失敗しました: #{@description}")
+			end
 		end
 		def start_fork
 			@pid=fork { exec(*@args,:in=>:in,:out=>@@o,:err=>@@e) }
@@ -182,8 +187,6 @@ class Execute
 		fh.close if fh.class==File
 	end
 
-
-
 	def self.descTime(sec)
 		t=""
 		r=sec/3600;v=r.floor
@@ -195,10 +198,6 @@ class Execute
 		r=(r-v)*1000
 		t+="#{sprintf("%07.3f",r)}ms"
 		t
-	end
-
-	def self.descEC(s)
-		s.signaled? ? "terminated due to signal #{s.termsig}" : "exit code: #{s.exitstatus}"
 	end
 
 end

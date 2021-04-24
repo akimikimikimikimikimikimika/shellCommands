@@ -26,16 +26,19 @@ class Data {
 };
 
 void output(VS);
-void error(string text);
+void error(S text);
 
 // convert array with memory management
 char** vs2ca(VS);
 void clear(char**);
 
+// concatenate vector<string>
+S join(VS,const char*);
+
 // easy equality check
-bool eq(string target,string s1);
+bool eq(S target,S s1);
 template<typename... Sn>
-bool eq(string target, string s1, Sn ...sn) {
+bool eq(S target, S s1, Sn ...sn) {
 	return eq(target,s1) ? true : eq(target,sn...);
 }
 

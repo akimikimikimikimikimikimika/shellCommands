@@ -1,7 +1,8 @@
 #include <cstring>
+#include <sstream>
 #include "lib.hpp"
 
-void error(string text) {
+void error(S text) {
 	cerr << text << endl;
 	exit(1);
 }
@@ -10,8 +11,17 @@ void output(VS d) {
 	for (string l:d) cout << l << endl;
 }
 
-bool eq(string target,string s1) {
+bool eq(S target,S s1) {
 	return target==s1;
+}
+
+
+
+typedef stringstream SS;
+S join(VS v,const char* delim) {
+	SS ss;
+	copy(v.begin(),v.end(),ostream_iterator<S>(ss,delim));
+	return ss.str();
 }
 
 
@@ -31,6 +41,8 @@ char** vs2ca(VS vs) {
 	ca[s]=nullptr;
 	return ca;
 }
+
+
 
 void clear(char** p) {
 	int n=0;

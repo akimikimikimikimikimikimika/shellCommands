@@ -1,6 +1,6 @@
 #! /bin/sh
 
-jarPath="../Time Measurement/measure-java.jar"
+jarPath="../Time Measurement/binaries/measure-java.jar"
 
 notFoundError() {
 	echo "Javaアーカイブファイルが見つかりません" >&2

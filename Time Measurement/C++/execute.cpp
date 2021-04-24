@@ -12,6 +12,7 @@
 using namespace chrono;
 typedef chrono::high_resolution_clock HRC;
 typedef HRC::time_point TP;
+typedef stringstream SS;
 
 class execute {
 
@@ -45,10 +46,10 @@ class execute {
 	private:
 
 	static Data* d;
-	static stringstream res;
+	static SS res;
 
 	static int single() {
-		sp p(d->command);
+		sp p(d->command,join(d->command," "));
 
 		TP st=HRC::now();
 		p.run();
@@ -119,6 +120,7 @@ class execute {
 
 		private:
 		char** args;
+		S description;
 
 		public:
 		int order=0;
@@ -126,8 +128,9 @@ class execute {
 		int ec=0;
 
 		public:
-		sp(VS args) {
+		sp(VS args,S desc) {
 			this->args=vs2ca(args);
+			this->description=desc;
 		}
 		static vector<sp> multiple(VS commands) {
 			char* shc=getenv("SHELL");
@@ -137,7 +140,7 @@ class execute {
 			int n=1;
 			for (S c:commands) {
 				VS a={sh,"-c",c};
-				sp p(a);
+				sp p(a,c);
 				p.order=n;
 				n++;
 				l.push_back(p);
@@ -163,7 +166,7 @@ class execute {
 				connect(d->out,STDOUT_FILENO);
 				connect(d->err,STDERR_FILENO);
 				if (execvp(args[0],args)<0) {
-					cerr << "プロセスの実行に失敗しました" << endl;
+					cerr << "実行に失敗しました: " << this->description << endl;
 					exit(255);
 				}
 			}
@@ -212,7 +215,7 @@ class execute {
 	}
 
 	static string descTime(nanoseconds dur) {
-		stringstream ss;
+		SS ss;
 		auto h=duration_cast<hours>(dur).count();
 		auto m=duration_cast<minutes>(dur).count();
 		auto s=duration_cast<seconds>(dur).count();

@@ -1,0 +1,14 @@
+{
+	"files.associations": {
+		"*.f": "FortranFreeForm",
+		"ostream": "cpp",
+		"filesystem": "cpp",
+		"iomanip": "cpp",
+		"queue": "cpp",
+		"stack": "cpp",
+		"random": "cpp",
+		"iostream": "cpp",
+		"*.json": "jsonc",
+		"iosfwd": "cpp"
+	}
+}

@@ -65,6 +65,11 @@ function serial() {
 	}
 	$en=hrtime(true);
 
+	$res=implode(PHP_EOL,[
+		"time: ".descTime($en-$st),
+		...array_map(function($p){ return "process$p->order id: ".($p->pid<0?"N/A":$p->pid); },$pl),
+		$lp->descEC(),""
+	]);
 	$res="time: ".descTime($en-$st).PHP_EOL;
 	foreach ($pl as $p) $res.="process$p->order id: ".($p->pid<0?"N/A":$p->pid).PHP_EOL;
 	$res.=$lp->descEC().PHP_EOL;
@@ -112,18 +117,25 @@ class SP {
 		global $res,$ec;
 		$ec=0;
 
-		$res="time: ".descTime($en-$st).PHP_EOL;
+		$r=["time: ".descTime($en-$st)];
 		foreach ($pl as $p) {
-			$res.=
-			"process$p->order id: $p->pid".PHP_EOL.
-			$p->descEC().PHP_EOL;
 			if ($p->ec>$ec) $ec=$p->ec;
+			array_push($r,"process$p->order id: $p->pid",$p->descEC());
 		}
+		array_push($r,"");
+		$res=implode(PHP_EOL,$r);
 	}
 
 	public function start() {
 		global $o,$e;
-		$this->r=proc_open($this->args,[0=>STDIN,1=>$o,2=>$e],$p);
+		try {
+			$this->r=proc_open($this->args,[0=>STDIN,1=>$o,2=>$e],$p);
+			if ($this->r==false) throw Exception();
+		}
+		catch(Exception $e) {
+			$as=implode(" ",$this->args);
+			error("実行に失敗しました: $as");
+		}
 	}
 
 	public function wait() {
@@ -145,15 +157,6 @@ class SP {
 		return $s["signaled"] ? "terminated due to signal ".strval($s["termsig"]) : "exit code: ".strval($this->ec);
 	}
 
-}
-
-function run($c) {
-	global $o,$e;
-	$r=proc_open($c,[0=>STDIN,1=>$o,2=>$e],$p);
-	$s=proc_get_status($r);
-	$ec=proc_close($r);
-	if ($s["running"]) $s["exitcode"]=$ec;
-	return $s;
 }
 
 
